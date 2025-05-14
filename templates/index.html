@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kraken Portfolio Visualizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .positive { color: green; }
+    .negative { color: red; }
+    #donutSection { display: none; text-align: center; }
+
+    #chartContainer {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+
+canvas {
+  width: 100%;
+  max-width: 450px;
+  height: auto;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Kraken Portfolio</h1>
+
+  <form id="apiForm">
+    <label>API Key: <input type="text" id="apiKey" required></label><br><br>
+    <label>API Secret: <input type="password" id="apiSecret" required></label><br><br>
+    <button type="submit">Fetch Portfolio</button>
+  </form>
+  
+  <table id="portfolioTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>Amount</th>
+        <th>Avg. Cost (€)</th>
+        <th>Current Price (€)</th>
+        <th>Invested (€)</th>
+        <th>Value (€)</th>
+        <th>PNL (€)</th>
+        <th>PNL (%)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="chartContainer" style="display: none; margin-top: 40px; justify-content: center; gap: 40px; flex-wrap: wrap; flex-direction: row;">
+
+  <div id="filterSection" style="width: 100%; align-self: flex-start; margin-left: 20px; margin-bottom: 20px;">
+   <label for="assetFilter">Asset: </label>
+    <select id="assetFilter">
+      <option value="ALL">ALL</option>
+    </select>
+  </div>
+
+
+    <div id="donutSection" style="text-align: center;">
+      <h2>Portfolio Distribution</h2>
+      <div style="width: 500px; height: 400px;">
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+    <div id="summarySection" style="text-align: center;">
+      <h2>Portfolio Summary</h2>
+      <div style="width: 500px; height: 400px;">
+        <canvas id="summaryChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <p id="errorMsg" style="color: red;"></p>
+  <p id="loadingMsg" style="color: gray;"></p>
+
+  <script>
+  const form = document.getElementById('apiForm');
+  const table = document.getElementById('portfolioTable');
+  const tbody = table.querySelector('tbody');
+  const errorMsg = document.getElementById('errorMsg');
+  const loadingMsg = document.getElementById('loadingMsg');
+  const donutSection = document.getElementById('donutSection');
+  const summarySection = document.getElementById('summarySection');
+  const chartContainer = document.getElementById('chartContainer');
+  const assetSelect = document.getElementById('assetFilter');
+
+  const assetLabelMap = {
+    'XXBT': 'BTC',
+    'XETH': 'ETH',
+    'ZEUR': 'EUR',
+    // Agrega más equivalencias si necesitas
+  };
+
+  const fiatSymbols = {
+    'EUR': '€',
+    'USD': '$',
+    'GBP': '£',
+    'JPY': '¥',
+    'CAD': 'C$',
+    'CHF': 'Fr.',
+    'KRW': '₩'
+  };
+
+  function renderCharts(data) {
+    const fiatAsset = data.find(a => a.average_cost === null);
+    const fiatCode = fiatAsset ? fiatAsset.asset.replace(/^Z/, '') : 'EUR';
+    const symbol = fiatSymbols[fiatCode] || '';
+
+    // === Donut Chart ===
+    const donutCanvas = document.getElementById('donutChart');
+    const labels = [];
+    const values = [];
+
+    data.forEach(asset => {
+      const value = parseFloat(asset.current_value);
+      if (!isNaN(value) && value > 0 && asset.average_cost !== null) {
+        labels.push(assetLabelMap[asset.asset] || asset.asset);
+        values.push(value);
+      }
+    });
+
+    if (window.donutChart && typeof window.donutChart.destroy === 'function') {
+      window.donutChart.destroy();
+    }
+
+    donutSection.style.display = labels.length ? 'block' : 'none';
+
+    if (labels.length > 0) {
+      window.donutChart = new Chart(donutCanvas, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: [
+              '#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0',
+              '#3f51b5', '#00bcd4', '#ffc107', '#795548', '#607d8b'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const total = context.chart._metasets[0].total;
+                  const value = context.parsed;
+                  const percent = ((value / total) * 100).toFixed(2);
+                  return `${context.label}: ${symbol}${value.toFixed(2)} (${percent}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // === Summary Chart ===
+    const summaryCanvas = document.getElementById('summaryChart');
+    let totalInvested = 0;
+    let totalCurrent = 0;
+
+    data.forEach(a => {
+      if (a.average_cost !== null) {
+        totalInvested += a.total_invested;
+        totalCurrent += a.current_value;
+      }
+    });
+
+    const profit = totalCurrent - totalInvested;
+    const profitPercent = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
+
+    const summaryLabels = [
+      'Total Invested',
+      'Current Value',
+      `Profit (${profitPercent.toFixed(2)}%)`
+    ];
+
+    if (window.summaryChart && typeof window.summaryChart.destroy === 'function') {
+      window.summaryChart.destroy();
+    }
+
+    summarySection.style.display = 'block';
+
+    window.summaryChart = new Chart(summaryCanvas, {
+      type: 'bar',
+      data: {
+        labels: summaryLabels,
+        datasets: [{
+          label: `Portfolio (${symbol})`,
+          data: [
+            totalInvested.toFixed(2),
+            totalCurrent.toFixed(2),
+            profit.toFixed(2)
+          ],
+          backgroundColor: [
+            '#ff9800',
+            totalCurrent >= totalInvested ? '#4caf50' : '#f44336',
+            profit >= 0 ? '#4caf50' : '#f44336'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return symbol + value;
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.dataset.label}: ${symbol}${context.parsed.y}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.textContent = '';
+    loadingMsg.textContent = 'Fetching portfolio, please wait...';
+    tbody.innerHTML = '';
+    table.style.display = 'none';
+    chartContainer.style.display = 'none';
+
+    const api_key = document.getElementById('apiKey').value;
+    const api_secret = document.getElementById('apiSecret').value;
+
+    try {
+      const response = await fetch('/api/portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key, api_secret })
+      });
+
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        errorMsg.textContent = data.error || 'Unexpected response format';
+        console.error('Backend error:', data);
+        return;
+      }
+
+      window.portfolioData = data;
+
+      loadingMsg.textContent = '';
+
+      if (data.error) {
+        errorMsg.textContent = data.error;
+        return;
+      }
+
+      data.forEach(asset => {
+        if (asset.average_cost === null) return;
+        const row = document.createElement('tr');
+        const readableAsset = assetLabelMap[asset.asset] || asset.asset;
+        row.innerHTML = `
+          <td>${readableAsset}</td>
+          <td>${asset.amount}</td>
+          <td>${asset.average_cost}</td>
+          <td>${asset.current_price}</td>
+          <td>${asset.total_invested}</td>
+          <td>${asset.current_value}</td>
+          <td class="${asset.pnl_eur >= 0 ? 'positive' : 'negative'}">${asset.pnl_eur}</td>
+          <td class="${asset.pnl_percent >= 0 ? 'positive' : 'negative'}">${asset.pnl_percent}%</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Mostrar tabla y contenedor de gráficos
+      form.style.display = 'none';
+      table.style.display = '';
+      chartContainer.style.display = 'flex';
+
+      // Rellenar selector de assets
+      assetSelect.innerHTML = '<option value="ALL">ALL</option>';
+      data.forEach(a => {
+        if (a && typeof a.asset === 'string' && a.average_cost !== null) {
+          const label = assetLabelMap[a.asset] || a.asset;
+          const option = document.createElement('option');
+          option.value = a.asset;
+          option.textContent = label;
+          assetSelect.appendChild(option);
+        }
+      });
+      renderCharts(data);
+
+    } catch (err) {
+      loadingMsg.textContent = '';
+      errorMsg.textContent = 'Something went wrong. Check the console.';
+      console.error(err);
+    }
+  });
+
+  assetSelect.addEventListener('change', () => {
+    const selected = assetSelect.value;
+    const filtered = selected === 'ALL'
+      ? window.portfolioData
+      : window.portfolioData.filter(a => a.asset === selected);
+    renderCharts(filtered);
+  });
+  </script>
+</body>
+</html>
