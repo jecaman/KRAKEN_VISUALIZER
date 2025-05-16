@@ -37,61 +37,110 @@ canvas {
   height: auto;
 }
 
+.kpiBox {
+  border: 1px solid #ccc;
+  padding: 15px 20px;
+  text-align: center;
+  min-width: 120px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+.kpiBox p {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 5px 0 0 0;
+}
+
   </style>
 </head>
 <body>
   <h1>Kraken Portfolio</h1>
 
+  <!-- ░░░░░░ API Credentials Form ░░░░░░ -->
   <form id="apiForm">
     <label>API Key: <input type="text" id="apiKey" required></label><br><br>
     <label>API Secret: <input type="password" id="apiSecret" required></label><br><br>
     <button type="submit">Fetch Portfolio</button>
   </form>
-  
-  <table id="portfolioTable" style="display: none;">
-    <thead>
-      <tr>
-        <th>Asset</th>
-        <th>Amount</th>
-        <th>Avg. Cost (€)</th>
-        <th>Current Price (€)</th>
-        <th>Invested (€)</th>
-        <th>Value (€)</th>
-        <th>PNL (€)</th>
-        <th>PNL (%)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 
-  <div id="chartContainer" style="display: none; margin-top: 40px; justify-content: center; gap: 40px; flex-wrap: wrap; flex-direction: row;">
+  <!-- ░░░░░░ GLOBAL SUMMARY SECTION ░░░░░░ -->
+  <section id="globalSummarySection" style="display: none; margin-top: 40px;">
+    <h2>📊 Global Summary</h2>
 
-  <div id="filterSection" style="width: 100%; align-self: flex-start; margin-left: 20px; margin-bottom: 20px;">
-   <label for="assetFilter">Asset: </label>
-    <select id="assetFilter">
-      <option value="ALL">ALL</option>
-    </select>
-  </div>
+    <div id="kpiContainer" style="display: flex; justify-content: space-around; margin-bottom: 30px;">
+      <div class="kpiBox"><h3>Total Invested</h3><p id="kpiInvested">-</p></div>
+      <div class="kpiBox"><h3>Current Value</h3><p id="kpiValue">-</p></div>
+      <div class="kpiBox"><h3>Liquidity</h3><p id="kpiLiquidity">-</p></div>
+      <div class="kpiBox"><h3>Profit</h3><p id="kpiProfit">-</p></div>
+      <div class="kpiBox"><h3>Profit %</h3><p id="kpiProfitPct">-</p></div>
+    </div>
 
-
-    <div id="donutSection" style="text-align: center;">
-      <h2>Portfolio Distribution</h2>
-      <div style="width: 500px; height: 400px;">
-        <canvas id="donutChart"></canvas>
+    <div id="chartContainer" style="display: none; justify-content: center; gap: 40px; flex-wrap: wrap; flex-direction: row;">
+      
+      <div id="donutSection" style="text-align: center;">
+        <h3>Portfolio Distribution</h3>
+        <div style="width: 500px; height: 400px;">
+          <canvas id="donutChart"></canvas>
+        </div>
+      </div>
+      <div id="investmentSection" style="text-align: center;">
+        <h3>Investment Distribution</h3>
+        <div style="width: 500px; height: 400px;">
+          <canvas id="investmentPieChart"></canvas>
+        </div>
+      </div>
+      <div id="summarySection" style="text-align: center;">
+        <h3>Portfolio Summary</h3>
+        <div style="width: 500px; height: 400px;">
+          <canvas id="summaryChart"></canvas>
+        </div>
       </div>
     </div>
-    <div id="summarySection" style="text-align: center;">
-      <h2>Portfolio Summary</h2>
-      <div style="width: 500px; height: 400px;">
-        <canvas id="summaryChart"></canvas>
-      </div>
-    </div>
-  </div>
+  </section>
 
+  <!-- ░░░░░░ TABLE VIEW SECTION ░░░░░░ -->
+  <section id="tableSection" style="display: none; margin-top: 40px;">
+    <h2>📄 Portfolio Breakdown (per asset)</h2>
+    <table id="portfolioTable" style="display: none;">
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Amount</th>
+          <th>Avg. Cost (€)</th>
+          <th>Current Price (€)</th>
+          <th>Invested (€)</th>
+          <th>Value (€)</th>
+          <th>PNL (€)</th>
+          <th>PNL (%)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ░░░░░░ FILTERED ASSET ANALYSIS ░░░░░░ -->
+  <section id="assetAnalysisSection" style="display: none; margin-top: 40px;">
+    <h2>🔍 Asset-Specific Analysis</h2>
+
+    <!-- Filtro de activo -->
+    <div id="filterSection" style="margin-bottom: 20px;">
+      <label for="assetFilter">Select Asset:</label>
+      <select id="assetFilter">
+        <option value="ALL">ALL</option>
+      </select>
+    </div>
+
+    <!-- Aquí se añadirán nuevos gráficos en el futuro -->
+    <div id="assetChartsContainer">
+      <!-- Por ejemplo: gráfico de líneas de evolución temporal, histograma de compras, etc. -->
+    </div>
+  </section>
+</body>
   <p id="errorMsg" style="color: red;"></p>
   <p id="loadingMsg" style="color: gray;"></p>
 
-  <script>
+<script>
+  // === Elementos del DOM ===
   const form = document.getElementById('apiForm');
   const table = document.getElementById('portfolioTable');
   const tbody = table.querySelector('tbody');
@@ -102,36 +151,67 @@ canvas {
   const chartContainer = document.getElementById('chartContainer');
   const assetSelect = document.getElementById('assetFilter');
 
-  const assetLabelMap = {
-    'XXBT': 'BTC',
-    'XETH': 'ETH',
-    'ZEUR': 'EUR',
-    // Agrega más equivalencias si necesitas
-  };
+  // === Mapas de activos y símbolos fiat ===
+  const assetLabelMap = { 'XXBT': 'BTC', 'XETH': 'ETH', 'ZEUR': 'EUR' };
+  const fiatSymbols = { 'EUR': '€', 'USD': '$', 'GBP': '£', 'JPY': '¥', 'CAD': 'C$', 'CHF': 'Fr.', 'KRW': '₩' };
 
-  const fiatSymbols = {
-    'EUR': '€',
-    'USD': '$',
-    'GBP': '£',
-    'JPY': '¥',
-    'CAD': 'C$',
-    'CHF': 'Fr.',
-    'KRW': '₩'
-  };
-
-  function renderCharts(data) {
+  // === Funciones utilitarias ===
+  function getFiatSymbol(data) {
     const fiatAsset = data.find(a => a.average_cost === null);
     const fiatCode = fiatAsset ? fiatAsset.asset.replace(/^Z/, '') : 'EUR';
-    const symbol = fiatSymbols[fiatCode] || '';
+    return fiatSymbols[fiatCode] || '';
+  }
 
-    // === Donut Chart ===
+  function updateKpis(symbol, invested, current, profit, profitPct, liquidity) {
+    document.getElementById('kpiInvested').textContent = `${symbol}${invested.toFixed(2)}`;
+    document.getElementById('kpiValue').textContent = `${symbol}${current.toFixed(2)}`;
+    document.getElementById('kpiProfit').textContent = `${symbol}${profit.toFixed(2)}`;
+    document.getElementById('kpiProfitPct').textContent = `${profitPct.toFixed(2)}%`;
+    document.getElementById('kpiLiquidity').textContent = `${symbol}${liquidity.toFixed(2)}`;
+  }
+
+  function renderTable(data) {
+    tbody.innerHTML = '';
+    data.forEach(asset => {
+      if (asset.average_cost === null) return;
+      const row = document.createElement('tr');
+      const readableAsset = assetLabelMap[asset.asset] || asset.asset;
+      row.innerHTML = `
+        <td>${readableAsset}</td>
+        <td>${asset.amount}</td>
+        <td>${asset.average_cost}</td>
+        <td>${asset.current_price}</td>
+        <td>${asset.total_invested}</td>
+        <td>${asset.current_value}</td>
+        <td class="${asset.pnl_eur >= 0 ? 'positive' : 'negative'}">${asset.pnl_eur}</td>
+        <td class="${asset.pnl_percent >= 0 ? 'positive' : 'negative'}">${asset.pnl_percent}%</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function populateAssetFilter(data) {
+    assetSelect.innerHTML = '<option value="ALL">ALL</option>';
+    data.forEach(a => {
+      if (a && typeof a.asset === 'string' && a.average_cost !== null) {
+        const label = assetLabelMap[a.asset] || a.asset;
+        const option = document.createElement('option');
+        option.value = a.asset;
+        option.textContent = label;
+        assetSelect.appendChild(option);
+      }
+    });
+  }
+
+  // === Gráficos ===
+  function renderDonutChart(data, symbol) {
     const donutCanvas = document.getElementById('donutChart');
     const labels = [];
     const values = [];
 
     data.forEach(asset => {
       const value = parseFloat(asset.current_value);
-      if (!isNaN(value) && value > 0 && asset.average_cost !== null) {
+      if (!isNaN(value) && value > 0) {
         labels.push(assetLabelMap[asset.asset] || asset.asset);
         values.push(value);
       }
@@ -144,10 +224,28 @@ canvas {
     donutSection.style.display = labels.length ? 'block' : 'none';
 
     if (labels.length > 0) {
+      // Plugin para pintar el total en el centro
+      const centerTextPlugin = {
+        id: 'centerText',
+        beforeDraw(chart) {
+          const { ctx, width, height } = chart;
+          ctx.restore();
+          const total = chart.data.datasets[0].data.reduce((sum, v) => sum + v, 0);
+          const fontSize = (height / 150).toFixed(2);
+          ctx.font = `${fontSize}em sans-serif`;
+          ctx.textBaseline = 'middle';
+          const text = `${symbol}${total.toFixed(2)}`;
+          const textX = Math.round((width - ctx.measureText(text).width) / 2);
+          const textY = height / 2;
+          ctx.fillText(text, textX, textY);
+          ctx.save();
+        }
+      };
+
       window.donutChart = new Chart(donutCanvas, {
         type: 'doughnut',
         data: {
-          labels: labels,
+          labels,
           datasets: [{
             data: values,
             backgroundColor: [
@@ -163,7 +261,7 @@ canvas {
             legend: { position: 'bottom' },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label(context) {
                   const total = context.chart._metasets[0].total;
                   const value = context.parsed;
                   const percent = ((value / total) * 100).toFixed(2);
@@ -172,29 +270,19 @@ canvas {
               }
             }
           }
-        }
+        },
+        plugins: [ centerTextPlugin ]
       });
     }
+  }
 
-    // === Summary Chart ===
+
+  function renderSummaryChart(invested, current, profit, profitPct, symbol) {
     const summaryCanvas = document.getElementById('summaryChart');
-    let totalInvested = 0;
-    let totalCurrent = 0;
-
-    data.forEach(a => {
-      if (a.average_cost !== null) {
-        totalInvested += a.total_invested;
-        totalCurrent += a.current_value;
-      }
-    });
-
-    const profit = totalCurrent - totalInvested;
-    const profitPercent = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
-
     const summaryLabels = [
       'Total Invested',
       'Current Value',
-      `Profit (${profitPercent.toFixed(2)}%)`
+      `Profit (${profitPct.toFixed(2)}%)`
     ];
 
     if (window.summaryChart && typeof window.summaryChart.destroy === 'function') {
@@ -210,13 +298,13 @@ canvas {
         datasets: [{
           label: `Portfolio (${symbol})`,
           data: [
-            totalInvested.toFixed(2),
-            totalCurrent.toFixed(2),
+            invested.toFixed(2),
+            current.toFixed(2),
             profit.toFixed(2)
           ],
           backgroundColor: [
             '#ff9800',
-            totalCurrent >= totalInvested ? '#4caf50' : '#f44336',
+            current >= invested ? '#4caf50' : '#f44336',
             profit >= 0 ? '#4caf50' : '#f44336'
           ]
         }]
@@ -228,7 +316,7 @@ canvas {
           y: {
             beginAtZero: true,
             ticks: {
-              callback: function(value) {
+              callback: function (value) {
                 return symbol + value;
               }
             }
@@ -238,7 +326,7 @@ canvas {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 return `${context.dataset.label}: ${symbol}${context.parsed.y}`;
               }
             }
@@ -248,11 +336,96 @@ canvas {
     });
   }
 
+  function renderInvestmentPieChart(data, symbol) {
+    const canvas = document.getElementById('investmentPieChart');
+    const labels = [];
+    const values = [];
+
+    data.forEach(asset => {
+      if (asset.average_cost !== null && asset.total_invested > 0) {
+        labels.push(assetLabelMap[asset.asset] || asset.asset);
+        values.push(asset.total_invested);
+      }
+    });
+
+    if (window.investmentPieChart && typeof window.investmentPieChart.destroy === 'function') {
+      window.investmentPieChart.destroy();
+    }
+
+    const total = values.reduce((sum, v) => sum + v, 0);
+
+    const centerTextPlugin = {
+      id: 'centerInvestmentText',
+      beforeDraw(chart) {
+        const { ctx, width, height } = chart;
+        ctx.restore();
+        const fontSize = (height / 150).toFixed(2);
+        ctx.font = `${fontSize}em sans-serif`;
+        ctx.textBaseline = 'middle';
+        const text = `${symbol}${total.toFixed(2)}`;
+        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+        const textY = height / 2;
+        ctx.fillText(text, textX, textY);
+        ctx.save();
+      }
+    };
+
+    window.investmentPieChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: [
+            '#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0',
+            '#3f51b5', '#00bcd4', '#ffc107', '#795548', '#607d8b'
+          ]
+        }]
+      },
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label(context) {
+                const total = context.chart._metasets[0].total;
+                const value = context.parsed;
+                const percent = ((value / total) * 100).toFixed(2);
+                return `${context.label}: ${symbol}${value.toFixed(2)} (${percent}%)`;
+              }
+            }
+          },
+          legend: {
+            position: 'bottom'
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      },
+      plugins: [centerTextPlugin]
+    });
+  }
+
+  function renderCharts(data) {
+    const symbol = getFiatSymbol(data);
+    const filteredAssets = data.filter(a => a.average_cost !== null);
+    const totalInvested = filteredAssets.reduce((sum, a) => sum + a.total_invested, 0);
+    const totalCurrent = filteredAssets.reduce((sum, a) => sum + a.current_value, 0);
+    const profit = totalCurrent - totalInvested;
+    const profitPercent = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
+    const fiatAsset = data.find(a => a.average_cost === null);
+    const liquidity = fiatAsset ? fiatAsset.current_value : 0;
+
+    updateKpis(symbol, totalInvested, totalCurrent, profit, profitPercent, liquidity);
+    renderDonutChart(data, symbol);
+    renderSummaryChart(totalInvested, totalCurrent, profit, profitPercent, symbol);
+    renderInvestmentPieChart(data, symbol);
+  }
+
+  // === Petición al backend + renderizado ===
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorMsg.textContent = '';
     loadingMsg.textContent = 'Fetching portfolio, please wait...';
-    tbody.innerHTML = '';
     table.style.display = 'none';
     chartContainer.style.display = 'none';
 
@@ -267,6 +440,7 @@ canvas {
       });
 
       const data = await response.json();
+
       if (!Array.isArray(data)) {
         errorMsg.textContent = data.error || 'Unexpected response format';
         console.error('Backend error:', data);
@@ -274,7 +448,6 @@ canvas {
       }
 
       window.portfolioData = data;
-
       loadingMsg.textContent = '';
 
       if (data.error) {
@@ -282,40 +455,16 @@ canvas {
         return;
       }
 
-      data.forEach(asset => {
-        if (asset.average_cost === null) return;
-        const row = document.createElement('tr');
-        const readableAsset = assetLabelMap[asset.asset] || asset.asset;
-        row.innerHTML = `
-          <td>${readableAsset}</td>
-          <td>${asset.amount}</td>
-          <td>${asset.average_cost}</td>
-          <td>${asset.current_price}</td>
-          <td>${asset.total_invested}</td>
-          <td>${asset.current_value}</td>
-          <td class="${asset.pnl_eur >= 0 ? 'positive' : 'negative'}">${asset.pnl_eur}</td>
-          <td class="${asset.pnl_percent >= 0 ? 'positive' : 'negative'}">${asset.pnl_percent}%</td>
-        `;
-        tbody.appendChild(row);
-      });
+      renderTable(data);
+      renderCharts(data);
+      populateAssetFilter(data);
 
-      // Mostrar tabla y contenedor de gráficos
       form.style.display = 'none';
       table.style.display = '';
       chartContainer.style.display = 'flex';
-
-      // Rellenar selector de assets
-      assetSelect.innerHTML = '<option value="ALL">ALL</option>';
-      data.forEach(a => {
-        if (a && typeof a.asset === 'string' && a.average_cost !== null) {
-          const label = assetLabelMap[a.asset] || a.asset;
-          const option = document.createElement('option');
-          option.value = a.asset;
-          option.textContent = label;
-          assetSelect.appendChild(option);
-        }
-      });
-      renderCharts(data);
+      document.getElementById('globalSummarySection').style.display = 'block';
+      document.getElementById('tableSection').style.display = 'block';
+      document.getElementById('assetAnalysisSection').style.display = 'block';
 
     } catch (err) {
       loadingMsg.textContent = '';
@@ -324,6 +473,7 @@ canvas {
     }
   });
 
+  // === Filtro por activo individual ===
   assetSelect.addEventListener('change', () => {
     const selected = assetSelect.value;
     const filtered = selected === 'ALL'
@@ -331,6 +481,4 @@ canvas {
       : window.portfolioData.filter(a => a.asset === selected);
     renderCharts(filtered);
   });
-  </script>
-</body>
-</html>
+</script>
