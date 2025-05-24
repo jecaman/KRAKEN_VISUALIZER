@@ -3,341 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Kraken Portfolio Visualizer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { 
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
-      padding: 30px; /* Updated */
-      font-size: 16px; 
-      line-height: 1.6; 
-      color: #333; 
-      background-color: #f4f7f9; 
-    }
-    .form-container {
-      background-color: #f8f9fa; /* Kept as is, or could be #fff if body is #f4f7f9 */
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      max-width: 500px; /* Optional: to constrain form width */
-      margin: 40px auto; /* Optional: to center the form */
-    }
-    #apiForm label {
-      margin-bottom: 8px;
-      display: block;
-      color: #495057; /* Good contrast */
-      font-weight: 500; /* Updated from bold */
-    }
-    #apiForm input[type="text"],
-    #apiForm input[type="password"] {
-      width: calc(100% - 20px);
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 1em; /* Ensure consistent font size */
-    }
-    #apiForm button[type="submit"] {
-      background-color: #007bff;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 1em; /* Ensure consistent font size */
-      font-weight: 500;
-      transition: background-color 0.3s ease;
-    }
-    #apiForm button[type="submit"]:hover {
-      background-color: #0056b3;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    /* th, td { OLD STYLES - REMOVED } */
-    /* th { OLD STYLES - REMOVED } */
-
-    .positive { color: #28a745 !important; font-weight: bold; }
-    .negative { color: #dc3545 !important; font-weight: bold; }
-    #donutSection { display: none; text-align: center; }
-
-    #globalSummarySection h2, 
-    #tableSection h2, 
-    #assetAnalysisSection h2 {
-      font-size: 26px; /* Slightly reduced from 28px for better balance */
-      color: #2c3e50; /* Consistent with h1 */
-      margin-bottom: 25px; /* Adjusted */
-      text-align: center;
-      font-weight: 600; /* Updated */
-    }
-
-    #kpiContainer {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 30px;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .kpiBox {
-      border: 1px solid #dee2e6;
-      padding: 20px;
-      text-align: center;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      min-width: 150px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .kpiBox:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    }
-
-    .kpiBox h3 {
-      font-size: 0.9em; /* Adjusted relative to body */
-      color: #6c757d;
-      margin-bottom: 8px;
-      font-weight: 500; /* Updated from normal */
-    }
-
-    .kpiBox p {
-      font-size: 1.5em; /* Adjusted relative to body */
-      font-weight: 700; /* Updated from bold */
-      margin: 5px 0 0 0;
-      color: #212529; /* Good contrast */
-    }
-
-    #chartContainer {
-      display: flex;
-      justify-content: center;
-      gap: 30px; /* Updated */
-      flex-wrap: wrap;
-      margin-top: 30px; /* Updated */
-      padding: 20px; /* Added */
-      background-color: #f8f9fa; /* Added */
-      border-radius: 8px; /* Added */
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Added */
-    }
-
-    #chartContainer h3, 
-    #timelineSection h3 { /* For titles like "Portfolio Distribution" */
-      font-size: 1.25em; /* Approx 20px if base is 16px */
-      color: #343a40; /* Darker for better emphasis */
-      margin-bottom: 15px;
-      text-align: center;
-      font-weight: 600; /* Updated */
-    }
-
-    /* Styling for parent divs of chart canvases */
-    #donutSection > div,
-    #investmentSection > div,
-    #summarySection > div {
-      background-color: #ffffff;
-      padding: 15px;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-
-    #timelineSection h3 { /* Style for "Evolución del Valor Total" title */
-      font-size: 20px;
-      color: #495057;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    #timelineSection > div:first-of-type { /* Granularity filter container */
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    #timelineSection label[for="granularityFilter"] {
-      font-weight: 500; /* Updated from bold */
-      color: #495057;
-      margin-right: 8px;
-    }
-
-    #granularityFilter {
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: 1px solid #ced4da;
-      background-color: white;
-      transition: border-color 0.2s ease; 
-      font-size: 0.9em; /* Consistent font size */
-    }
-
-    #granularityFilter:hover {
-      border-color: #adb5bd; 
-    }
-    
-    #timelineSection > div:last-of-type { /* Parent div of portfolioTimelineChart */
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 6px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        margin-top: 15px;
-    }
-
-    /* #tableSection h2 is covered by the combined rule earlier */
-
-    .portfolio-table-styled {
-      width: 100%;
-      border-collapse: separate; 
-      border-spacing: 0; /* Required with border-collapse: separate */
-      margin-top: 20px;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      overflow: hidden; /* Ensures child elements adhere to border-radius */
-    }
-
-    .portfolio-table-styled th {
-      background-color: #f8f9fa;
-      color: #495057;
-      font-weight: 600; /* Updated from bold */
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 2px solid #dee2e6;
-      font-size: 0.95em; /* Slightly smaller than body for table headers */
-    }
-    
-    .portfolio-table-styled th:first-child {
-        border-top-left-radius: 8px; /* Not strictly needed if table has overflow:hidden */
-    }
-    .portfolio-table-styled th:last-child {
-        border-top-right-radius: 8px; /* Not strictly needed if table has overflow:hidden */
-    }
-
-    .portfolio-table-styled td {
-      padding: 10px 15px;
-      border-bottom: 1px solid #e9ecef;
-      text-align: left;
-      color: #333; /* Consistent with body */
-      line-height: 1.5; /* Ensure good line height in cells */
-      font-size: 0.95em; /* Slightly smaller for table cells */
-    }
-
-    .portfolio-table-styled tbody tr {
-      transition: background-color 0.2s ease;
-    }
-
-    .portfolio-table-styled tbody tr:hover {
-      background-color: #f1f3f5;
-    }
-    
-    .portfolio-table-styled tbody tr:last-child td {
-        border-bottom: none; /* Remove bottom border for the last row cells */
-    }
-
-    /* #assetAnalysisSection h2 is covered by the combined rule earlier */
-
-    #filterSection {
-      background-color: #f8f9fa; /* Kept as is, or #fff */
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      margin-bottom: 30px;
-      /* max-width: 500px; /* Uncomment if a max-width is desired */
-      /* margin-left: auto; /* Uncomment for centering if max-width is set */
-      /* margin-right: auto; /* Uncomment for centering if max-width is set */
-    }
-
-    #filterSection label[for="assetFilter"] {
-      font-weight: 500; /* Updated from bold */
-      color: #495057;
-      margin-right: 10px;
-      font-size: 1em; /* Consistent font size */
-    }
-
-    #assetFilter {
-      padding: 10px 15px;
-      border-radius: 4px;
-      border: 1px solid #ced4da;
-      background-color: white;
-      font-size: 0.9em; /* Consistent font size */
-      min-width: 200px;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    #assetFilter:hover {
-      border-color: #adb5bd; /* Hover effect for asset filter */
-    }
-
-    #assetFilter:focus {
-      border-color: #80bdff;
-      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-      outline: none;
-    }
-
-
-    /* Custom Dark-Mode Scrollbars */
-    /* For Webkit-based browsers (Chrome, Safari, new Edge) */
-    ::-webkit-scrollbar {
-        width: 12px;
-        height: 12px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: #2c3e50;
-        border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background-color: #596a7b;
-        border-radius: 10px;
-        border: 3px solid #2c3e50;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background-color: #7d8da1;
-    }
-
-    ::-webkit-scrollbar-button {
-        display: none;
-    }
-
-    ::-webkit-scrollbar-corner {
-        background: #2c3e50;
-    }
-
-    /* For Firefox */
-    html {
-        scrollbar-width: thin;
-        scrollbar-color: #596a7b #2c3e50;
-    }
-
-
-canvas {
-  width: 100% !important;
-  height: auto !important;
-}
-
-  </style>
 </head>
 <body>
-  <h1 style="font-size: 36px; color: #2c3e50; font-weight: 700; margin-bottom: 30px; text-align: center;">Kraken Portfolio</h1>
+  <h1>Kraken Portfolio</h1>
 
   <!-- ░░░░░░ API Credentials Form ░░░░░░ -->
-  <div class="form-container">
-    <form id="apiForm">
-      <label for="apiKey">API Key:</label>
-      <input type="text" id="apiKey" required>
-      <label for="apiSecret">API Secret:</label>
-      <input type="password" id="apiSecret" required>
-      <button type="submit">Fetch Portfolio</button>
-    </form>
-  </div>
+  <form id="apiForm">
+    <label>API Key: <input type="text" id="apiKey" required></label><br><br>
+    <label>API Secret: <input type="password" id="apiSecret" required></label><br><br>
+    <button type="submit">Fetch Portfolio</button>
+  </form>
 
   <!-- ░░░░░░ GLOBAL SUMMARY SECTION ░░░░░░ -->
-  <section id="globalSummarySection" style="display: none; margin-top: 50px;">
+  <section id="globalSummarySection" style="display: none;"> <!-- Removed margin-top -->
     <h2>📊 Global Portfolio Summary</h2>
 
-    <div id="kpiContainer" style="display: flex; justify-content: space-around; margin-bottom: 30px; gap: 20px; flex-wrap: wrap;">
+    <div id="kpiContainer" style="display: flex;"> <!-- Removed justify-content and margin-bottom -->
       <div class="kpiBox"><h3>Total Invested</h3><p id="kpiInvested">-</p></div>
       <div class="kpiBox"><h3>Current Value</h3><p id="kpiValue">-</p></div>
       <div class="kpiBox"><h3>Liquidity</h3><p id="kpiLiquidity">-</p></div>
@@ -345,54 +28,55 @@ canvas {
       <div class="kpiBox"><h3>Profit %</h3><p id="kpiProfitPct">-</p></div>
     </div>
 
-    <div id="chartContainer" style="display: none; justify-content: center; gap: 30px; flex-wrap: wrap; flex-direction: row; margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+    <div id="chartContainer" style="display: none;"> <!-- Removed layout styles -->
       
-      <div id="donutSection" style="text-align: center;">
+      <div id="donutSection"> <!-- Removed text-align -->
         <h3>Portfolio Distribution</h3>
-        <div style="width: 500px; height: 400px; background-color: #ffffff; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div> <!-- Removed width and height -->
           <canvas id="donutChart"></canvas>
         </div>
       </div>
 
-      <div id="investmentSection" style="text-align: center;">
+      <div id="investmentSection"> <!-- Removed text-align -->
         <h3>Investment Distribution</h3>
-        <div style="width: 500px; height: 400px; background-color: #ffffff; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div> <!-- Removed width and height -->
           <canvas id="investmentPieChart"></canvas>
         </div>
       </div>
 
-      <div id="summarySection" style="text-align: left;">
+      <div id="summarySection"> <!-- Removed text-align -->
         <h3>Portfolio Summary</h3>
-        <div style="width: 500px; height: 400px; background-color: #ffffff; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div> <!-- Removed width and height -->
           <canvas id="summaryChart"></canvas>
         </div>
       </div>
-    </div>
-    <!-- FUERA DEL chartContainer -->
-  <div id="timelineSection" style="display: none; text-align: center; margin-top: 40px;">
-    <h3>📈 Evolución del Valor Total</h3>
 
-      <!--  Filtro de granularidad -->
-      <div style="margin-bottom: 15px; text-align: center;">
-        <label for="granularityFilter"><strong>Granularidad:</strong></label>
-        <select id="granularityFilter">
-          <option value="daily">Diario</option>
-          <option value="weekly">Semanal</option>
-          <option value="monthly">Mensual</option>
-        </select>
+      <!-- timelineSection is MOVED INSIDE chartContainer now -->
+      <div id="timelineSection" style="display: none;"> <!-- Removed text-align, margin-top, width, flex-basis -->
+        <h3>📈 Evolución del Valor Total</h3>
+    
+          <!--  Filtro de granularidad -->
+          <div> <!-- Removed margin-bottom -->
+            <label for="granularityFilter"><strong>Granularidad:</strong></label>
+            <select id="granularityFilter">
+              <option value="daily">Diario</option>
+              <option value="weekly">Semanal</option>
+              <option value="monthly">Mensual</option>
+            </select>
+          </div>
+        <!-- Gráfico -->
+        <div> <!-- Removed width, max-width, aspect-ratio, margin -->
+          <canvas id="portfolioTimelineChart"></canvas>
+        </div>
       </div>
-    <!-- Gráfico -->
-    <div style="width: 100%; max-width: 1200px; aspect-ratio: 3 / 1; margin: 0 auto; background-color: #ffffff; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-top:15px;">
-      <canvas id="portfolioTimelineChart"></canvas>
-    </div>
-  </div>
+    </div> <!-- This is the closing div for chartContainer -->
 
   </section>
 
   <!-- ░░░░░░ TABLE VIEW SECTION ░░░░░░ -->
-  <section id="tableSection" style="display: none; margin-top: 50px;">
+  <section id="tableSection" style="display: none; margin-top: 40px;">
     <h2>📄 Portfolio Breakdown (per asset)</h2>
-    <table id="portfolioTable" class="portfolio-table-styled">
+    <table id="portfolioTable" style="display: none;">
       <thead>
         <tr>
           <th>Asset</th>
@@ -410,7 +94,7 @@ canvas {
   </section>
 
   <!-- ░░░░░░ FILTERED ASSET ANALYSIS ░░░░░░ -->
-  <section id="assetAnalysisSection" style="display: none; margin-top: 50px;">
+  <section id="assetAnalysisSection" style="display: none; margin-top: 40px;">
     <h2>🔍 Asset-Specific Analysis</h2>
 
     <!-- Filtro de activo -->
@@ -427,8 +111,8 @@ canvas {
     </div>
   </section>
 </body>
-  <p id="errorMsg" style="color: red; margin-top: 15px; font-weight: bold; text-align: center;"></p>
-  <p id="loadingMsg" style="color: gray; margin-top: 15px; text-align: center;"></p>
+  <p id="errorMsg" style="color: red;"></p>
+  <p id="loadingMsg" style="color: gray;"></p>
 
 <script>
   // === Elementos del DOM ===
