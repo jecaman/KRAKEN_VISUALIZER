@@ -32,10 +32,10 @@
   }
 
 canvas {
-  width: 100%;
-  max-width: 450px;
-  height: auto;
+  width: 100% !important;
+  height: auto !important;
 }
+
 
 .kpiBox {
   border: 1px solid #ccc;
@@ -83,19 +83,40 @@ canvas {
           <canvas id="donutChart"></canvas>
         </div>
       </div>
+
       <div id="investmentSection" style="text-align: center;">
         <h3>Investment Distribution</h3>
         <div style="width: 500px; height: 400px;">
           <canvas id="investmentPieChart"></canvas>
         </div>
       </div>
-      <div id="summarySection" style="text-align: center;">
+
+      <div id="summarySection" style="text-align: left;">
         <h3>Portfolio Summary</h3>
         <div style="width: 500px; height: 400px;">
           <canvas id="summaryChart"></canvas>
         </div>
       </div>
     </div>
+    <!-- FUERA DEL chartContainer -->
+  <div id="timelineSection" style="display: none; text-align: center; margin-top: 40px;">
+    <h3>📈 Evolución del Valor Total</h3>
+
+      <!--  Filtro de granularidad -->
+      <div style="margin-bottom: 10px;">
+        <label for="granularityFilter"><strong>Granularidad:</strong></label>
+        <select id="granularityFilter">
+          <option value="daily">Diario</option>
+          <option value="weekly">Semanal</option>
+          <option value="monthly">Mensual</option>
+        </select>
+      </div>
+    <!-- Gráfico -->
+    <div style="width: 100%; max-width: 1200px; aspect-ratio: 3 / 1; margin: 0 auto;">
+      <canvas id="portfolioTimelineChart"></canvas>
+    </div>
+  </div>
+
   </section>
 
   <!-- ░░░░░░ TABLE VIEW SECTION ░░░░░░ -->
@@ -405,7 +426,159 @@ canvas {
     });
   }
 
-  function renderCharts(data) {
+  function renderPortfolioTimelineChart(timelineData) {
+    const ctx = document.getElementById('portfolioTimelineChart');
+
+    const labels = timelineData.map(d => d.date);
+    const values = timelineData.map(d => d.value);
+    const profits = timelineData.map(d => d.profit);
+
+    if (window.timelineChart && typeof window.timelineChart.destroy === 'function') {
+      window.timelineChart.destroy();
+    }
+
+    document.getElementById('timelineSection').style.display = 'block';
+
+    window.timelineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Portfolio Value (€)',
+            data: values,
+            borderColor: '#2196f3',
+            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+            tension: 0.3,
+            pointRadius: 1,
+            fill: true,
+            yAxisID: 'y',
+          },
+          {
+            label: 'Profit (€)',
+            data: profits,
+            borderColor: '#4caf50',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            tension: 0.3,
+            pointRadius: 1,
+            fill: true,
+            yAxisID: 'y1',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            position: 'left',
+            ticks: {
+              callback: value => `€${value}`
+            },
+            title: {
+              display: true,
+              text: 'Valor total'
+            }
+          },
+          y1: {
+            beginAtZero: false,
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: {
+              callback: value => `€${value}`
+            },
+            title: {
+              display: true,
+              text: 'Profit acumulado'
+            }
+          }
+        },
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function agruparPor(timeline, modo) {
+    const agrupado = {};
+    const hoy = new Date();
+
+    // Lunes actual (semana actual)
+    const lunesActual = new Date(hoy);
+    lunesActual.setDate(hoy.getDate() - hoy.getDay() + 1);
+    const claveSemanaActual = lunesActual.toISOString().split("T")[0];
+
+    // Clave mes actual
+    const claveMesActual = `${hoy.getFullYear()}-${(hoy.getMonth() + 1).toString().padStart(2, '0')}`;
+
+    timeline.forEach(entry => {
+      const date = new Date(entry.date);
+      let clave;
+
+      if (modo === "monthly") {
+        const mes = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        clave = mes === claveMesActual ? "Este mes" : mes;
+      } else if (modo === "weekly") {
+        const monday = new Date(date);
+        monday.setDate(date.getDate() - date.getDay() + 1);
+        const claveLunes = monday.toISOString().split("T")[0];
+        clave = claveLunes === claveSemanaActual ? "Esta semana" : claveLunes;
+      } else {
+        clave = entry.date;
+      }
+
+      if (!agrupado[clave]) agrupado[clave] = [];
+      agrupado[clave].push(entry);
+    });
+
+    // Convertir a array de objetos promedio
+    let resultado = Object.entries(agrupado).map(([key, group]) => {
+      const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+      return {
+        date: key,
+        value: avg(group.map(e => e.value)),
+        cost: avg(group.map(e => e.cost)),
+        profit: avg(group.map(e => e.profit)),
+        profit_pct: avg(group.map(e => e.profit_pct))
+      };
+    });
+
+    // === Añadir punto final de la fecha más reciente si falta ===
+    const ultimaFecha = timeline[timeline.length - 1];
+    const ultimaClave = modo === "weekly" ? "Esta semana"
+                    : modo === "monthly" ? "Este mes"
+                    : ultimaFecha.date;
+
+    const yaIncluido = resultado.some(r => r.date === ultimaClave);
+    if (!yaIncluido && (modo === "weekly" || modo === "monthly")) {
+      resultado.push({
+        date: ultimaClave,
+        value: ultimaFecha.value,
+        cost: ultimaFecha.cost,
+        profit: ultimaFecha.profit,
+        profit_pct: ultimaFecha.profit_pct
+      });
+    }
+
+    return resultado;
+  }
+
+
+
+  function renderCharts(data, timeline) {
     const symbol = getFiatSymbol(data);
     const filteredAssets = data.filter(a => a.average_cost !== null);
     const totalInvested = filteredAssets.reduce((sum, a) => sum + a.total_invested, 0);
@@ -419,6 +592,8 @@ canvas {
     renderDonutChart(data, symbol);
     renderSummaryChart(totalInvested, totalCurrent, profit, profitPercent, symbol);
     renderInvestmentPieChart(data, symbol);
+    renderPortfolioTimelineChart(timeline);
+
   }
 
   // === Petición al backend + renderizado ===
@@ -441,13 +616,17 @@ canvas {
 
       const data = await response.json();
 
-      if (!Array.isArray(data)) {
+      if (!data.summary || !Array.isArray(data.summary)) {
         errorMsg.textContent = data.error || 'Unexpected response format';
         console.error('Backend error:', data);
         return;
       }
 
-      window.portfolioData = data;
+      const summary = data.summary;
+      const timeline = data.timeline;
+      window.portfolioData = summary;
+      fullTimeline = timeline;
+
       loadingMsg.textContent = '';
 
       if (data.error) {
@@ -455,9 +634,9 @@ canvas {
         return;
       }
 
-      renderTable(data);
-      renderCharts(data);
-      populateAssetFilter(data);
+      renderTable(summary);
+      renderCharts(summary, timeline);
+      populateAssetFilter(summary);
 
       form.style.display = 'none';
       table.style.display = '';
@@ -472,13 +651,20 @@ canvas {
       console.error(err);
     }
   });
+  let fullTimeline = []; // guardamos el timeline completo
+
+  document.getElementById('granularityFilter').addEventListener('change', () => {
+    const modo = document.getElementById('granularityFilter').value;
+    const timelineFiltrado = agruparPor(fullTimeline, modo);
+    renderPortfolioTimelineChart(timelineFiltrado);
+  });
 
   // === Filtro por activo individual ===
-  assetSelect.addEventListener('change', () => {
-    const selected = assetSelect.value;
-    const filtered = selected === 'ALL'
-      ? window.portfolioData
-      : window.portfolioData.filter(a => a.asset === selected);
-    renderCharts(filtered);
-  });
+  // assetSelect.addEventListener('change', () => {
+  //   const selected = assetSelect.value;
+  //   const filtered = selected === 'ALL'
+  //     ? window.portfolioData
+  //     : window.portfolioData.filter(a => a.asset === selected);
+  //   renderCharts(filtered);
+  // });
 </script>
