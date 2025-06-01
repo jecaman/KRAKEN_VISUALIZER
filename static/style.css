@@ -1,309 +1,98 @@
+/* === 1. BASE & RESET === */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
-/* === Base === */
+:root {
+  --bg-dark: #000;
+  --text-light: #f0f0f0;
+  --accent: #bb77dd;
+  --accent-light: #d0aaff;
+  --form-bg: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+  --btn-primary: #aa00fe;
+  --btn-primary-hover: #7500a3;
+  --toast-bg:  #bb77dd;
+  --toast-progress: #aa00fe;
+  --divider-line: rgba(255, 255, 255, 0.15);
+}
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'DM Sans', sans-serif;
-  background: #000;
-  color: #f0f0f0;
-  scroll-behavior: smooth;
+  background: var(--bg-dark);
+  color: var(--text-light);
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-main {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5px 10px;
-  box-sizing: border-box;
-  margin-bottom: -5px;
-}
-
-/* === Layout principal === */
-
-.main-container {
-  display: flex;
-  justify-content: center;
-  padding: 60px 20px;
-}
-
-.main-horizontal {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 20px;
-  gap: 80px;
-  margin-top: -30px;
-  margin-left: 450px; /* Elimina el margen izquierdo inválido */
-  box-sizing: border-box;
-  position: relative;
-}
-
-/* Columna izquierda centrada */
-.left-column {
-  flex: 1;
-  max-width: 720px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center; /* Añadido */
-  text-align: center;
-}
-
-/* Columna derecha colocada correctamente */
-.steps-panel {
-  flex-shrink: 0;
-  width: 420px;  /* antes era 360px */
-  font-size: 0.95rem;
-  margin-left: 20px; /* Añadido */
-  margin-top: 230px;
-  color: #ccc;
-}
-
-/* Botón de cabecera */
-.steps-toggle {
-  font-family: 'DM Sans', sans-serif;
-  background: none;
-  border: none;
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.35rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-}
-
-#stepsIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background-color: #333;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: bold;
-  line-height: 1;
-  transform: translateY(1px);
-  transition: transform 0.3s ease;
-}
-
-/* Contenido colapsable */
-.steps-content {
-  overflow: hidden;
-  transition: max-height 0.5s ease, opacity 0.4s ease;
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-  margin-top: 8px;
-  padding-left: 12px;
-}
-
-.steps-content.expanded {
-  max-height: 2000px;
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* Secciones internas */
-.step-block {
-  margin-top: 20px;
-  padding-left: 12px;
-}
-
-.steps-content h4 {
-  color: #fff;
-  font-weight: 500;
-  font-size: 1.05rem;
-  margin-bottom: 10px;
-}
-
-/* Lista vertical con línea y puntos */
-.step-list {
-  padding: 0 0 8px 0; /* Si quieres algo de espacio, mantenlo aquí */
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  border-left: 2px solid #333;
-  position: relative;
-  margin-left: 60px; /* o incluso 40px para más aire */
-}
-
-
-
-.step-list li {
-  position: relative;
-  padding: 10px 0 10px 44px;
-  line-height: 1.6;
-  color: #eaeaea;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.step-list li:last-child {
-  margin-bottom: -15px;
-}
-
-.steps-content.expanded .step-list li {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Escalonado */
-.steps-content.expanded .step-list li:nth-child(1) { transition-delay: 0.05s; }
-.steps-content.expanded .step-list li:nth-child(2) { transition-delay: 0.15s; }
-.steps-content.expanded .step-list li:nth-child(3) { transition-delay: 0.25s; }
-.steps-content.expanded .step-list li:nth-child(4) { transition-delay: 0.35s; }
-
-/* Puntos */
-.step-list .dot {
-  position: absolute;
-  left: -11px;
-  top: 10px;
-  width: 20px;
-  height: 20px;
-  background-color: #fff;
-  color: #111;
-  font-weight: bold;
-  font-size: 0.85rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.substep-list {
-  list-style: disc;
-  padding-left: 30px;
-  margin-top: 8px;
-  color: #ccc;
-  font-size: 0.95rem;
-}
-
-.substep-list li {
-  padding: 4px 0;
-}
-
-/* Enlaces */
-a {
-  color: #b480ff;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a:hover {
-  color: #d0aaff;
-  text-decoration: underline;
-}
-
-/* === Branding === */
-.branding-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.main-logo {
-  width: 220px;
-  margin: -30px 0 10px;
-}
-
-.branding-slogan {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: #6642b1;
-  text-shadow: 0 0 8px #9042b1;
-  animation: fadeIn 1s ease-in-out;
-  margin: 0 0 30px;
-  text-align: center;
-}
-
-/* === Formulario === */
-.form-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 720px;
-  width: 100%;
-  text-align: center;
-  margin: 0 auto;
-}
-
+/* === 2. TYPOGRAPHY === */
 .main-title {
   font-size: 3.2rem;
   font-weight: 700;
-  margin: -50px 0 0.5rem;
+  margin: -10px 0 0.5rem;
+  margin-bottom: -20px;
   color: #fff;
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
   letter-spacing: -1px;
-  animation: fadeIn 0.8s ease-out;
+  text-align: center;
 }
 
 .subtitle {
   font-size: 1.2rem;
   color: #ac00fc;
   font-weight: 500;
-  margin-bottom: 1.5rem;
-  animation: fadeIn 0.8s ease-out;
+  margin-bottom: 1rem;
   text-shadow: 0 0 10px rgb(241, 0, 225);
+  text-align: center;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 60px 20px;
+  box-sizing: border-box;
+}
+.core-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+
+
+/* === 4. COMPONENTS === */
+.main-logo {
+  width: 220px;
+  margin-top: -20px;
 }
 
 form#apiForm {
-  background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+  background: var(--form-bg);
   padding: 30px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-  max-width: 720px;
+  max-width: 480px;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  padding: 60px 30px; /* antes era 30px, ahora más alto */
   backdrop-filter: blur(12px);
-  animation: fadeIn 1s ease-in-out;
-  transition: all 0.3s ease;
-}
-
-form label {
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: bold;
-  align-self: flex-start;
-  margin-bottom: 8px;
-}
-
-form label[for="apiKey"]::before {
-  content: "🔑 ";
-}
-
-form label[for="apiSecret"]::before {
-  content: "🔒 ";
 }
 
 .input-icon {
-  position: relative;
   width: 100%;
   margin-bottom: 10px;
   padding-top: 4px;
@@ -311,12 +100,24 @@ form label[for="apiSecret"]::before {
 
 .input-icon label {
   display: block;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: bold;
   margin-bottom: 8px;
+  text-align: left;
+}
+
+label[for="apiKey"]::before {
+  content: "\1F511  "; /* 🔑 */
+}
+
+label[for="apiSecret"]::before {
+  content: "\1F512  "; /* 🔒 */
 }
 
 .input-icon input {
   width: 100%;
-  padding: 16px 16px 16px 40px;
+  padding: 16px;
   border: 1px solid #333;
   border-radius: 8px;
   background-color: #f5f7fc;
@@ -327,54 +128,46 @@ form label[for="apiSecret"]::before {
   box-sizing: border-box;
 }
 
-/* Divider */
 .divider {
   display: flex;
   align-items: center;
   width: 100%;
-  margin: 20px 0;
+  gap: 12px;
 }
 
 .divider-line {
   flex: 1;
   height: 1px;
-  background-color: #444;
-  opacity: 0.4;
+  background-color: var(--divider-line);
 }
 
 .divider-text {
-  margin: 0 16px;
-  font-weight: bold;
-  font-size: 1rem;
-  color: #ccc;
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
-}
-
-/* Upload CSV */
-.excel-upload {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: -3px;
-}
-
-.excel-upload label {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #ffffff;
-  text-align: center;
-}
-
-.excel-upload input[type="file"] {
-  background-color: #f5f7fc;
-  color: #1a1a1a;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  color: #aaa;
   font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+button {
+  padding: 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+form#apiForm button[type="submit"] {
   width: 100%;
+  background: var(--btn-primary);
+  color: white;
+  margin-top: 10px;
+}
+
+form#apiForm button[type="submit"]:hover {
+  background: var(--btn-primary-hover);
+  transform: scale(1.03);
 }
 
 #uploadCsvBtn {
@@ -382,51 +175,17 @@ form label[for="apiSecret"]::before {
   color: #f0f0f0;
   padding: 12px 24px;
   border: 1px solid #444;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1.1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.3s ease, transform 0.2s ease, border 0.3s ease;
-  width: auto;
   min-width: 220px;
-  margin: 0 auto;
 }
 
 #uploadCsvBtn:hover {
   background: #2a2a2a;
-  border: 1px solid #666;
+  border-color: #666;
   transform: scale(1.02);
 }
 
-
-form button[type="submit"] {
-  width: 100%;
-  background: linear-gradient(145deg, #aa00fe, #aa00fe);
-  color: white;
-  padding: 16px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1.1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
-
-form button[type="submit"]:hover {
-  background: linear-gradient(145deg, #7500a3, #5f0091);
-  transform: scale(1.03);
-}
-
 .kraken-disclaimer {
-  margin-top: 18px;
+  margin-top: -40px;
   font-size: 1rem;
   color: #ff8888;
   text-align: center;
@@ -434,10 +193,8 @@ form button[type="submit"]:hover {
   text-shadow: 0 0 5px rgba(255, 100, 100, 0.4);
 }
 
-/* Loader */
 .btc-loader {
   margin-top: 20px;
-  animation: fadeIn 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -447,38 +204,31 @@ form button[type="submit"]:hover {
   width: 40px;
   height: 40px;
   animation: spin 1.2s linear infinite;
-  filter: drop-shadow(0 0 4px #bb77dd);
-}
-
-.btc-text,
-#loadingMsg {
-  color: #bb77dd;
-  font-size: 0.95rem;
-  text-align: center;
-  text-shadow: 0 0 6px rgba(187, 119, 221, 0.4);
+  filter: drop-shadow(0 0 4px var(--accent));
 }
 
 .btc-text {
   margin-top: 8px;
   font-style: italic;
+  color: var(--accent);
+  font-size: 0.95rem;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(187, 119, 221, 0.4);
 }
 
-#loadingMsg {
-  margin-top: 16px;
-  font-weight: 500;
-}
-
-/* Footer */
 .footer {
-  margin-top: -10px;
+  height: 80px; /* Altura fija */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.9rem;
   color: #aaa;
-  text-align: center;
   opacity: 0.85;
-  padding: 24px 0;
   border-top: 1px solid #2a2a2a;
   width: 100%;
+  padding: 0 20px;
   box-sizing: border-box;
+  margin-top: auto; /* ⬅️ ESTE es el truco */
 }
 
 .footer a {
@@ -489,7 +239,7 @@ form button[type="submit"]:hover {
 }
 
 .footer a:hover {
-  color: #bb77dd;
+  color: var(--accent);
 }
 
 .footer-profile {
@@ -504,47 +254,15 @@ form button[type="submit"]:hover {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  border: 2px solid #bb77dd;
+  border: 2px solid var(--accent);
   box-shadow: 0 0 4px rgba(187, 119, 221, 0.6);
 }
 
-/* Toasts */
-#toastContainer {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
+.hidden {
+  display: none !important;
 }
 
-.toast {
-  background: #2ed58f;
-  color: #0a0a0a;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 1rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  animation: fadeInOutToast 3.2s ease forwards;
-  position: relative;
-  overflow: hidden;
-}
-
-.toast::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  background-color: #015b29;
-  width: 100%;
-  animation: toastProgress 3.2s linear forwards;
-}
-
-/* Animaciones */
+/* === 5. ANIMATIONS === */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -564,3 +282,240 @@ form button[type="submit"]:hover {
   0% { width: 100%; }
   100% { width: 0%; }
 }
+
+/* === 6. TOAST === */
+#toastContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.toast {
+  background: var(--toast-bg);
+  color: #0a0a0a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  animation: fadeInOutToast 3.2s ease forwards;
+  position: relative;
+}
+
+.toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: var(--toast-progress);
+  width: 100%;
+  animation: toastProgress 3.2s linear forwards;
+}
+
+/* === 7. RESPONSIVE === */
+@media (max-width: 768px) {
+  .core-block {
+    padding: 30px 20px;
+  }
+}
+
+/* === Botón y bloque de ayuda juntos === */
+.help-toggle {
+  position: absolute;
+  top: -560px; /* Ajusta esta altura según tu diseño */
+  left: calc(50% + 280px); /* Esto lo pone a la derecha del form */
+  width: 680px;
+  z-index: 20;
+}
+
+#toggleHelpBtn {
+  background: none;
+  color: #ffffff;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+}
+
+#toggleHelpBtn::before {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #ffffff;
+  color: #000;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+#toggleHelpBtn:hover::before {
+  background-color: #bf43f4; /* nuevo color al hacer hover */
+  color: #000000; /* si también quieres cambiar el color del + */
+}
+
+#toggleHelpBtn:hover {
+  color: #bd7de0;
+}
+
+#stepsContent {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.4s ease;
+}
+
+#stepsContent.expanded {
+  max-height: 2000px; /* suficiente para contener todo */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+
+.step-block {
+  margin-bottom: 32px;
+}
+
+.step-block h4 {
+  margin: 20px 0 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f4f4f4; /* más blanco que #eaeaea */
+  border-left: 4px solid #444;
+  padding-left: 12px;
+}
+
+.step-list {
+  padding-left: 70px;
+  margin-top: 12px;
+  border-left-width: 2px;
+  position: relative;
+}
+
+.step-list::before {
+  content: "";
+  position: absolute;
+  left: 47px;
+  top: 20px;
+  bottom: 10px;
+  width: 2px;
+  background-color: #3a3a3a;
+  z-index: 0;
+}
+
+.step-list li {
+  margin-top: 8px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.3s ease;
+  color: #cccccc;
+  font-size: 0.96rem;
+}
+
+#stepsContent.expanded .step-list li {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+#stepsContent.expanded .step-list li:nth-child(1) { animation-delay: 0.05s; }
+#stepsContent.expanded .step-list li:nth-child(2) { animation-delay: 0.10s; }
+#stepsContent.expanded .step-list li:nth-child(3) { animation-delay: 0.15s; }
+#stepsContent.expanded .step-list li:nth-child(4) { animation-delay: 0.20s; }
+
+.step-content {
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.6;
+  color: #ddd;
+  
+}
+
+/* Hacer que los <strong> destaquen */
+.step-content strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Enlaces lilas */
+.step-list a {
+  color: #b38aff;
+  text-decoration: none;
+  font-weight: 500;
+}
+.step-list a:hover {
+  color: #d4afff;
+  text-decoration: underline;
+}
+
+/* Círculo del número */
+.dot {
+  position: absolute;
+  left: -32px;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  background-color: #fff;
+  color: #000;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 3px rgba(0,0,0,0.3);
+}
+
+/* Sublista elegante */
+.substep-list {
+  list-style: disc;
+  padding-left: 18px;
+  margin-top: 8px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+

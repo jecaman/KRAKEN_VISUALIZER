@@ -1,0 +1,74 @@
+
+    <!-- KPI y Gráficos -->
+    <section id="globalSummarySection" style="display: none;">
+      <h2>📊 Global Portfolio Summary</h2>
+
+      <div id="kpiContainer" style="display: flex;">
+        <div class="kpiBox"><h3>Total Invested</h3><p id="kpiInvested">-</p></div>
+        <div class="kpiBox"><h3>Current Value</h3><p id="kpiValue">-</p></div>
+        <div class="kpiBox"><h3>Liquidity</h3><p id="kpiLiquidity">-</p></div>
+        <div class="kpiBox"><h3>Profit</h3><p id="kpiProfit">-</p></div>
+        <div class="kpiBox"><h3>Profit %</h3><p id="kpiProfitPct">-</p></div>
+      </div>
+
+      <div id="chartContainer" style="display: none;">
+        <div id="donutSection">
+          <h3>Portfolio Distribution</h3>
+          <canvas id="donutChart"></canvas>
+        </div>
+        <div id="investmentSection">
+          <h3>Investment Distribution</h3>
+          <canvas id="investmentPieChart"></canvas>
+        </div>
+        <div id="summarySection">
+          <h3>Portfolio Summary</h3>
+          <canvas id="summaryChart"></canvas>
+        </div>
+        <div id="timelineSection" style="display: none;">
+          <h3>📈 Evolución del Valor Total</h3>
+          <label for="granularityFilter"><strong>Granularidad:</strong></label>
+          <select id="granularityFilter">
+            <option value="daily">Diario</option>
+            <option value="weekly">Semanal</option>
+            <option value="monthly">Mensual</option>
+          </select>
+          <canvas id="portfolioTimelineChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabla -->
+    <section id="tableSection" style="display: none; margin-top: 40px;">
+      <h2>📄 Portfolio Breakdown (per asset)</h2>
+      <table id="portfolioTable" style="display: none;">
+        <thead>
+          <tr>
+            <th>Asset</th>
+            <th>Amount</th>
+            <th>Avg. Cost (€)</th>
+            <th>Current Price (€)</th>
+            <th>Invested (€)</th>
+            <th>Value (€)</th>
+            <th>PNL (€)</th>
+            <th>PNL (%)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Filtro de activos -->
+    <section id="assetAnalysisSection" style="display: none; margin-top: 40px;">
+      <h2>🔍 Asset-Specific Analysis</h2>
+      <div id="filterSection" style="margin-bottom: 20px;">
+        <label for="assetFilter">Select Asset:</label>
+        <select id="assetFilter">
+          <option value="ALL">ALL</option>
+        </select>
+      </div>
+      <div id="assetChartsContainer"></div>
+    </section>
+
+    <!-- Errores y mensajes -->
+    <p id="errorMsg"></p>
+    <p id="loadingMsg"></p>
