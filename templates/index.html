@@ -1,52 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Portfolio Visualizer</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://kit.fontawesome.com/yourkitcode.js" crossorigin="anonymous"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
-</head>
-<body>
-  <div class="main-horizontal">
-  <!-- Branding: Logo + Slogan -->
-  <div class="branding-column">
-    <img src="{{ url_for('static', filename='logo_kraken.png') }}" alt="Tentacle Logo" class="main-logo" />
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Portfolio Visualizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/yourkitcode.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="main-horizontal">
 
-  <!-- Título + Formulario -->
-  <div class="form-block">
-    <h1 class="main-title">Portfolio Visualizer</h1>
-    <p class="subtitle">Track your true crypto performance.</p>
+        <!-- COLUMNA IZQUIERDA -->
+        <div class="left-column">
+          <div class="form-block">
+            <div class="branding-column">
+              <img src="{{ url_for('static', filename='logo_kraken.png') }}" alt="Tentacle Logo" class="main-logo" />
+            </div>
 
-    <form id="apiForm">
-      <div class="input-icon">
-        <label for="apiKey">API Key:</label>
-        <i class="fas fa-key"></i>
-        <input type="text" id="apiKey" required />
+            <h1 class="main-title">Portfolio Visualizer</h1>
+            <p class="subtitle">Track your true crypto performance.</p>
+
+            <form id="apiForm">
+              <div class="input-icon">
+                <label for="apiKey">API Key:</label>
+                <input type="text" id="apiKey" required />
+              </div>
+
+              <div class="input-icon">
+                <label for="apiSecret">API Secret:</label>
+                <input type="password" id="apiSecret" required />
+              </div>
+
+              <div class="divider">
+                <span class="divider-line"></span>
+                <span class="divider-text">OR</span>
+                <span class="divider-line"></span>
+              </div>
+
+              <div class="excel-upload">
+                <input type="file" id="csvInput" accept=".csv" style="display: none;" />
+                <button type="button" id="uploadCsvBtn">
+                  <i class="fas fa-file-csv"></i>📄 Upload CSV File
+                </button>
+              </div>
+
+              <div id="csvToast" class="csv-toast hidden"></div>
+
+              <button type="submit">
+                <span>Fetch Portfolio</span>
+              </button>
+            </form>
+
+            <p class="kraken-disclaimer">⚠️ Only works with <strong>Kraken Pro</strong></p>
+
+            <div id="loadingIcon" class="btc-loader" style="display: none;">
+              <img src="{{ url_for('static', filename='bitcoin.svg') }}" alt="Loading..." />
+              <p class="btc-text">Fetching portfolio, please wait...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA -->
+        <div class="steps-panel">
+          <button id="toggleSteps" class="steps-toggle">
+            <span id="stepsIcon">+</span> How to connect your data?
+          </button>
+
+          <div id="stepsContent" class="steps-content collapsed">
+            <div class="step-block">
+              <h4>🔑 Option 1: Kraken API Keys</h4>
+              <ul class="step-list">
+                <li><span class="dot">1</span> Go to <a href="https://pro.kraken.com/app/settings/api" target="_blank">pro.kraken.com › Settings › API</a></li>
+                <li><span class="dot">2</span> Click <strong>"Create API Key"</strong></li>
+                <li><span class="dot">3</span> Enable <strong>only</strong> the following permissions:
+                  <ul class="substep-list">
+                    <li><strong>Funds permissions › Query</strong></li>
+                    <li><strong>Orders and trades › Query open orders & trades</strong></li>
+                  </ul>
+                </li>
+                <li><span class="dot">4</span> Paste your <strong>API Key</strong> and <strong>API Secret</strong> into the form</li>
+              </ul>
+            </div>
+
+            <div class="step-block">
+              <h4>📄 Option 2: Upload a CSV</h4>
+              <ul class="step-list">
+                <li><span class="dot">1</span> Go to <a href="https://pro.kraken.com/app/settings/documents" target="_blank">kraken.com/u/history/export</a></li>
+                <li><span class="dot">2</span> Click <strong>"Create Export"</strong></li>
+                <li><span class="dot">3</span> Select <strong>"Trades"</strong> as type</li>
+                <li><span class="dot">4</span> Download and upload it here</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
       </div>
-
-      <div class="input-icon">
-        <label for="apiSecret">API Secret:</label>
-        <i class="fas fa-lock"></i>
-        <input type="password" id="apiSecret" required />
-      </div>
-
-      <button type="submit">
-        <span>Fetch Portfolio</span>
-      </button>
-    </form>
-
-    <p class="kraken-disclaimer">⚠️ Only works with <strong>Kraken Pro API Keys</strong></p>
-
-    <div id="loadingIcon" class="btc-loader" style="display: none;">
-      <img src="{{ url_for('static', filename='bitcoin.svg') }}" alt="Loading..." />
-      <p class="btc-text">Fetching portfolio, please wait...</p>
     </div>
-  </div>
-</div>
-</div>
+  </body>
+</html>
 
     <!-- KPI y Gráficos -->
     <section id="globalSummarySection" style="display: none;">
@@ -136,18 +189,58 @@
 
   <!-- Script -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <script>
-    document.getElementById("apiForm").addEventListener("submit", function () {
-      document.getElementById("loadingIcon").style.display = "block";
-    });
+  <script src="https://kit.fontawesome.com/yourkitcode.js" crossorigin="anonymous"></script>
 
-    document.getElementById("toggleExplanationBtn").addEventListener("click", function () {
-      const extra = document.getElementById("extraExplanation");
-      const isVisible = extra.style.display === "block";
-      extra.style.display = isVisible ? "none" : "block";
-      this.textContent = isVisible ? "See more" : "See less";
-    });
-  </script>
+<script>
+  const toggleBtn = document.getElementById("toggleSteps");
+  const stepsContent = document.getElementById("stepsContent");
+  const stepsIcon = document.getElementById("stepsIcon");
+
+  toggleBtn.addEventListener("click", () => {
+    const isExpanded = stepsContent.classList.toggle("expanded");
+    stepsContent.classList.toggle("collapsed", !isExpanded);
+    stepsIcon.textContent = isExpanded ? "−" : "+";
+  });
+
+  // Spinner cuando se usa API
+  document.getElementById("apiForm").addEventListener("submit", function () {
+    document.getElementById("loadingIcon").style.display = "block";
+  });
+
+  // Abrir selector al hacer clic en el botón CSV
+  document.getElementById('uploadCsvBtn').addEventListener('click', () => {
+    document.getElementById('csvInput').click();
+  });
+
+// Crear contenedor si no existe
+if (!document.getElementById('toastContainer')) {
+  const toastContainer = document.createElement('div');
+  toastContainer.id = 'toastContainer';
+  document.body.appendChild(toastContainer);
+}
+
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.getElementById('toastContainer').appendChild(toast);
+
+    // Remover después de la animación
+    setTimeout(() => {
+      toast.remove();
+    }, 3200);
+  }
+
+  document.getElementById('csvInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      showToast(` ${file.name} loaded successfully`);
+    }
+  });
+
+
+</script>
+
 </body>
 
 </html>
