@@ -330,67 +330,57 @@ form#apiForm button[type="submit"]:hover {
   }
 }
 
-/* === Botón y bloque de ayuda juntos === */
-.help-toggle {
-  position: absolute;
-  top: -560px; /* Ajusta esta altura según tu diseño */
-  left: calc(50% + 280px); /* Esto lo pone a la derecha del form */
-  width: 680px;
-  z-index: 20;
+/* === Help button & panel === */
+.form-wrapper {
+  position: relative;
 }
 
 #toggleHelpBtn {
-  background: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #b480ff;
+  background: transparent;
   color: #ffffff;
-  border: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  text-decoration: none;
-}
-
-#toggleHelpBtn::before {
-  content: "+";
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
   font-size: 1.2rem;
   font-weight: bold;
-  background-color: #ffffff;
-  color: #000;
-  border-radius: 50%;
-  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
 }
 
-#toggleHelpBtn:hover::before {
-  background-color: #bf43f4; /* nuevo color al hacer hover */
-  color: #000000; /* si también quieres cambiar el color del + */
-}
-
-#toggleHelpBtn:hover {
-  color: #bd7de0;
+#toggleHelpBtn:hover,
+#toggleHelpBtn:active {
+  background: #b480ff;
 }
 
 #stepsContent {
-  max-height: 0;
-  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: calc(100% + 20px);
+  width: 320px;
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
+  background: var(--form-bg);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
   opacity: 0;
-  transform: translateY(8px);
-  transition: all 0.4s ease;
+  pointer-events: none;
+  transform: translateX(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 #stepsContent.expanded {
-  max-height: 2000px; /* suficiente para contener todo */
   opacity: 1;
-  transform: translateY(0);
+  pointer-events: auto;
+  transform: translateX(0);
 }
 
 
