@@ -29,7 +29,7 @@
 
           <div class="divider">
             <span class="divider-line"></span>
-            <span class="divider-text">OR</span>
+            <span class="divider-text"><strong>OR</strong></span>
             <span class="divider-line"></span>
           </div>
 
@@ -46,6 +46,14 @@
             <span>Fetch Portfolio</span>
           </button>
         </form>
+
+        <p class="kraken-disclaimer">⚠️ Only works with <strong>Kraken Pro</strong></p>
+
+                <div id="loadingIcon" class="btc-loader hidden">
+          <img src="{{ url_for('static', filename='bitcoin.svg') }}" alt="Loading..." />
+          <p class="btc-text">Fetching portfolio, please wait...</p>
+        </div>
+
 <div class="core-block" style="position: relative;">
   <!-- todo tu contenido: logo, título, form, etc. -->
 
@@ -90,6 +98,7 @@
           </ul>
         </div>
       </div>
+      
 
       <!-- Opción 2 -->
       <div class="step-block">
@@ -127,15 +136,6 @@
     </div>
   </div>
 </div>
-
-
-
-        <p class="kraken-disclaimer">⚠️ Only works with <strong>Kraken Pro</strong></p>
-
-        <div id="loadingIcon" class="btc-loader hidden">
-          <img src="{{ url_for('static', filename='bitcoin.svg') }}" alt="Loading..." />
-          <p class="btc-text">Fetching portfolio, please wait...</p>
-        </div>
       </div>
     </main>
 

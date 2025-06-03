@@ -37,6 +37,7 @@ body {
   font-weight: 700;
   margin: -10px 0 0.5rem;
   margin-bottom: -20px;
+  margin-top: -40px;
   color: #fff;
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
   letter-spacing: -1px;
@@ -47,6 +48,7 @@ body {
   font-size: 1.2rem;
   color: #ac00fc;
   font-weight: 500;
+  margin-top: 5px;
   margin-bottom: 1rem;
   text-shadow: 0 0 10px rgb(241, 0, 225);
   text-align: center;
@@ -66,8 +68,10 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 24px;
+  transform: scale(0.90); /* Reduce todo un 15% */
+  transform-origin: top center; /* Opcional: punto de referencia para el escalado */
+  margin-bottom: -50px;
 }
-
 
 
 /* === 4. COMPONENTS === */
@@ -143,7 +147,7 @@ label[for="apiSecret"]::before {
 
 .divider-text {
   font-size: 0.9rem;
-  color: #aaa;
+  color: #ffffff;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
@@ -185,7 +189,7 @@ form#apiForm button[type="submit"]:hover {
 }
 
 .kraken-disclaimer {
-  margin-top: -40px;
+  margin-top: 5px;
   font-size: 1rem;
   color: #ff8888;
   text-align: center;
@@ -226,7 +230,7 @@ form#apiForm button[type="submit"]:hover {
   opacity: 0.85;
   border-top: 1px solid #2a2a2a;
   width: 100%;
-  padding: 0 20px;
+  padding: 0 10px;
   box-sizing: border-box;
   margin-top: auto; /* ⬅️ ESTE es el truco */
 }
@@ -256,6 +260,7 @@ form#apiForm button[type="submit"]:hover {
   border-radius: 50%;
   border: 2px solid var(--accent);
   box-shadow: 0 0 4px rgba(187, 119, 221, 0.6);
+  margin-top: 5px;
 }
 
 .hidden {
