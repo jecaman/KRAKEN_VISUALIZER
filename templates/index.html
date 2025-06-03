@@ -16,7 +16,9 @@
         <h1 class="main-title">Portfolio Visualizer</h1>
         <p class="subtitle">Track your true crypto performance.</p>
 
-        <form id="apiForm">
+        <div class="form-wrapper">
+          <form id="apiForm">
+            <button id="toggleHelpBtn" type="button" aria-label="Help">?</button>
           <div class="input-icon">
             <label for="apiKey">API Key:</label>
             <input type="text" id="apiKey" required />
@@ -42,10 +44,82 @@
 
           <div id="csvToast" class="csv-toast hidden"></div>
 
-          <button type="submit">
-            <span>Fetch Portfolio</span>
-          </button>
-        </form>
+            <button type="submit">
+              <span>Fetch Portfolio</span>
+            </button>
+          </form>
+          <div id="stepsContent" class="steps-content collapsed">
+            <!-- Opción 1 -->
+            <div class="step-block">
+              <div class="step-inner">
+                <h4>🔑 Option 1: Kraken API Keys</h4>
+                <ul class="step-list">
+                  <li>
+                    <span class="dot">1</span>
+                    <div class="step-content">
+                      Go to <a href="https://pro.kraken.com/app/settings/api" target="_blank">pro.kraken.com › Settings › API</a>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="dot">2</span>
+                    <div class="step-content">
+                      Click <strong>"Create API Key"</strong>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="dot">3</span>
+                    <div class="step-content">
+                      Enable <strong>only</strong> the following permissions:
+                      <ul class="substep-list">
+                        <li><strong>Funds permissions › Query</strong></li>
+                        <li><strong>Orders and trades › Query open orders & trades</strong></li>
+                      </ul>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="dot">4</span>
+                    <div class="step-content">
+                      Paste your <strong>API Key</strong> and <strong>API Secret</strong> into the form
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Opción 2 -->
+            <div class="step-block">
+              <div class="step-inner">
+                <h4>📄 Option 2: Upload a CSV</h4>
+                <ul class="step-list">
+                  <li>
+                    <span class="dot">1</span>
+                    <div class="step-content">
+                      Go to <a href="https://pro.kraken.com/app/settings/documents" target="_blank">kraken.com/u/history/export</a>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="dot">2</span>
+                    <div class="step-content">
+                      Click <strong>"Create Export"</strong>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="dot">3</span>
+                    <div class="step-content">
+                      Select <strong>"Trades"</strong> as type
+                    </div>
+                  </li>
+                  <li>
+                    <span class="dot">4</span>
+                    <div class="step-content">
+                      Download and upload it here
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <p class="kraken-disclaimer">⚠️ Only works with <strong>Kraken Pro</strong></p>
 
@@ -54,88 +128,6 @@
           <p class="btc-text">Fetching portfolio, please wait...</p>
         </div>
 
-<div class="core-block" style="position: relative;">
-  <!-- todo tu contenido: logo, título, form, etc. -->
-
-  <div class="help-toggle">
-    <button id="toggleHelpBtn" type="button">How to get your data</button>
-
-    <div id="stepsContent" class="steps-content collapsed">
-
-      <!-- Opción 1 -->
-      <div class="step-block">
-        <div class="step-inner">
-          <h4>🔑 Option 1: Kraken API Keys</h4>
-          <ul class="step-list">
-            <li>
-              <span class="dot">1</span>
-              <div class="step-content">
-                Go to <a href="https://pro.kraken.com/app/settings/api" target="_blank">pro.kraken.com › Settings › API</a>
-              </div>
-            </li>
-            <li>
-              <span class="dot">2</span>
-              <div class="step-content">
-                Click <strong>"Create API Key"</strong>
-              </div>
-            </li>
-            <li>
-              <span class="dot">3</span>
-              <div class="step-content">
-                Enable <strong>only</strong> the following permissions:
-                <ul class="substep-list">
-                  <li><strong>Funds permissions › Query</strong></li>
-                  <li><strong>Orders and trades › Query open orders & trades</strong></li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <span class="dot">4</span>
-              <div class="step-content">
-                Paste your <strong>API Key</strong> and <strong>API Secret</strong> into the form
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-      
-
-      <!-- Opción 2 -->
-      <div class="step-block">
-        <div class="step-inner">
-          <h4>📄 Option 2: Upload a CSV</h4>
-          <ul class="step-list">
-            <li>
-              <span class="dot">1</span>
-              <div class="step-content">
-                Go to <a href="https://pro.kraken.com/app/settings/documents" target="_blank">kraken.com/u/history/export</a>
-              </div>
-            </li>
-            <li>
-              <span class="dot">2</span>
-              <div class="step-content">
-                Click <strong>"Create Export"</strong>
-              </div>
-            </li>
-            <li>
-              <span class="dot">3</span>
-              <div class="step-content">
-                Select <strong>"Trades"</strong> as type
-              </div>
-            </li>
-            <li>
-              <span class="dot">4</span>
-              <div class="step-content">
-                Download and upload it here
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
       </div>
     </main>
 
