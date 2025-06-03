@@ -1,670 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Kraken Portfolio Visualizer</title>
+  <meta charset="UTF-8" />
+  <title>Portfolio Visualizer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #f0f0f0;
-    }
-    .positive { color: green; }
-    .negative { color: red; }
-    #donutSection { display: none; text-align: center; }
-
-    #chartContainer {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    flex-wrap: wrap;
-    margin-top: 40px;
-  }
-
-canvas {
-  width: 100% !important;
-  height: auto !important;
-}
-
-
-.kpiBox {
-  border: 1px solid #ccc;
-  padding: 15px 20px;
-  text-align: center;
-  min-width: 120px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-}
-.kpiBox p {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 5px 0 0 0;
-}
-
-  </style>
+  <script src="https://kit.fontawesome.com/yourkitcode.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
 </head>
-<body>
-  <h1>Kraken Portfolio</h1>
 
-  <!-- ░░░░░░ API Credentials Form ░░░░░░ -->
-  <form id="apiForm">
-    <label>API Key: <input type="text" id="apiKey" required></label><br><br>
-    <label>API Secret: <input type="password" id="apiSecret" required></label><br><br>
-    <button type="submit">Fetch Portfolio</button>
-  </form>
+<body>    
+    <main class="main-container">
+      <div class="core-block">
+        <img src="{{ url_for('static', filename='logo_kraken.png') }}" alt="Tentacle Logo" class="main-logo" />
+        <h1 class="main-title">Portfolio Visualizer</h1>
+        <p class="subtitle">Track your true crypto performance.</p>
 
-  <!-- ░░░░░░ GLOBAL SUMMARY SECTION ░░░░░░ -->
-  <section id="globalSummarySection" style="display: none; margin-top: 40px;">
-    <h2>📊 Global Portfolio Summary</h2>
+        <form id="apiForm">
+          <div class="input-icon">
+            <label for="apiKey">API Key:</label>
+            <input type="text" id="apiKey" required />
+          </div>
 
-    <div id="kpiContainer" style="display: flex; justify-content: space-around; margin-bottom: 30px;">
-      <div class="kpiBox"><h3>Total Invested</h3><p id="kpiInvested">-</p></div>
-      <div class="kpiBox"><h3>Current Value</h3><p id="kpiValue">-</p></div>
-      <div class="kpiBox"><h3>Liquidity</h3><p id="kpiLiquidity">-</p></div>
-      <div class="kpiBox"><h3>Profit</h3><p id="kpiProfit">-</p></div>
-      <div class="kpiBox"><h3>Profit %</h3><p id="kpiProfitPct">-</p></div>
-    </div>
+          <div class="input-icon">
+            <label for="apiSecret">API Secret:</label>
+            <input type="password" id="apiSecret" required />
+          </div>
 
-    <div id="chartContainer" style="display: none; justify-content: center; gap: 40px; flex-wrap: wrap; flex-direction: row;">
+          <div class="divider">
+            <span class="divider-line"></span>
+            <span class="divider-text"><strong>OR</strong></span>
+            <span class="divider-line"></span>
+          </div>
+
+          <div class="excel-upload">
+            <input type="file" id="csvInput" accept=".csv" hidden />
+            <button type="button" id="uploadCsvBtn">
+              <i class="fas fa-file-csv"></i> Upload CSV File
+            </button>
+          </div>
+
+          <div id="csvToast" class="csv-toast hidden"></div>
+
+          <button type="submit">
+            <span>Fetch Portfolio</span>
+          </button>
+        </form>
+
+        <p class="kraken-disclaimer">⚠️ Only works with <strong>Kraken Pro</strong></p>
+
+                <div id="loadingIcon" class="btc-loader hidden">
+          <img src="{{ url_for('static', filename='bitcoin.svg') }}" alt="Loading..." />
+          <p class="btc-text">Fetching portfolio, please wait...</p>
+        </div>
+
+<div class="core-block" style="position: relative;">
+  <!-- todo tu contenido: logo, título, form, etc. -->
+
+  <div class="help-toggle">
+    <button id="toggleHelpBtn" type="button">How to get your data</button>
+
+    <div id="stepsContent" class="steps-content collapsed">
+
+      <!-- Opción 1 -->
+      <div class="step-block">
+        <div class="step-inner">
+          <h4>🔑 Option 1: Kraken API Keys</h4>
+          <ul class="step-list">
+            <li>
+              <span class="dot">1</span>
+              <div class="step-content">
+                Go to <a href="https://pro.kraken.com/app/settings/api" target="_blank">pro.kraken.com › Settings › API</a>
+              </div>
+            </li>
+            <li>
+              <span class="dot">2</span>
+              <div class="step-content">
+                Click <strong>"Create API Key"</strong>
+              </div>
+            </li>
+            <li>
+              <span class="dot">3</span>
+              <div class="step-content">
+                Enable <strong>only</strong> the following permissions:
+                <ul class="substep-list">
+                  <li><strong>Funds permissions › Query</strong></li>
+                  <li><strong>Orders and trades › Query open orders & trades</strong></li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <span class="dot">4</span>
+              <div class="step-content">
+                Paste your <strong>API Key</strong> and <strong>API Secret</strong> into the form
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
       
-      <div id="donutSection" style="text-align: center;">
-        <h3>Portfolio Distribution</h3>
-        <div style="width: 500px; height: 400px;">
-          <canvas id="donutChart"></canvas>
+
+      <!-- Opción 2 -->
+      <div class="step-block">
+        <div class="step-inner">
+          <h4>📄 Option 2: Upload a CSV</h4>
+          <ul class="step-list">
+            <li>
+              <span class="dot">1</span>
+              <div class="step-content">
+                Go to <a href="https://pro.kraken.com/app/settings/documents" target="_blank">kraken.com/u/history/export</a>
+              </div>
+            </li>
+            <li>
+              <span class="dot">2</span>
+              <div class="step-content">
+                Click <strong>"Create Export"</strong>
+              </div>
+            </li>
+            <li>
+              <span class="dot">3</span>
+              <div class="step-content">
+                Select <strong>"Trades"</strong> as type
+              </div>
+            </li>
+            <li>
+              <span class="dot">4</span>
+              <div class="step-content">
+                Download and upload it here
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <div id="investmentSection" style="text-align: center;">
-        <h3>Investment Distribution</h3>
-        <div style="width: 500px; height: 400px;">
-          <canvas id="investmentPieChart"></canvas>
-        </div>
-      </div>
-
-      <div id="summarySection" style="text-align: left;">
-        <h3>Portfolio Summary</h3>
-        <div style="width: 500px; height: 400px;">
-          <canvas id="summaryChart"></canvas>
-        </div>
-      </div>
-    </div>
-    <!-- FUERA DEL chartContainer -->
-  <div id="timelineSection" style="display: none; text-align: center; margin-top: 40px;">
-    <h3>📈 Evolución del Valor Total</h3>
-
-      <!--  Filtro de granularidad -->
-      <div style="margin-bottom: 10px;">
-        <label for="granularityFilter"><strong>Granularidad:</strong></label>
-        <select id="granularityFilter">
-          <option value="daily">Diario</option>
-          <option value="weekly">Semanal</option>
-          <option value="monthly">Mensual</option>
-        </select>
-      </div>
-    <!-- Gráfico -->
-    <div style="width: 100%; max-width: 1200px; aspect-ratio: 3 / 1; margin: 0 auto;">
-      <canvas id="portfolioTimelineChart"></canvas>
     </div>
   </div>
+</div>
+      </div>
+    </main>
 
-  </section>
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-profile">
+        <img src="https://avatars.githubusercontent.com/jecaman" alt="Avatar" class="footer-avatar" />
+        <div>
+          Made with ❤️ by jecaman<br />
+          <a href="mailto:jesuscamposmanjon@gmail.com">📧 Email</a> ·
+          <a href="https://github.com/jecaman" target="_blank">💻 GitHub</a>
+        </div>
+      </div>
+    </footer>
 
-  <!-- ░░░░░░ TABLE VIEW SECTION ░░░░░░ -->
-  <section id="tableSection" style="display: none; margin-top: 40px;">
-    <h2>📄 Portfolio Breakdown (per asset)</h2>
-    <table id="portfolioTable" style="display: none;">
-      <thead>
-        <tr>
-          <th>Asset</th>
-          <th>Amount</th>
-          <th>Avg. Cost (€)</th>
-          <th>Current Price (€)</th>
-          <th>Invested (€)</th>
-          <th>Value (€)</th>
-          <th>PNL (€)</th>
-          <th>PNL (%)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+  </div>
 
-  <!-- ░░░░░░ FILTERED ASSET ANALYSIS ░░░░░░ -->
-  <section id="assetAnalysisSection" style="display: none; margin-top: 40px;">
-    <h2>🔍 Asset-Specific Analysis</h2>
-
-    <!-- Filtro de activo -->
-    <div id="filterSection" style="margin-bottom: 20px;">
-      <label for="assetFilter">Select Asset:</label>
-      <select id="assetFilter">
-        <option value="ALL">ALL</option>
-      </select>
-    </div>
-
-    <!-- Aquí se añadirán nuevos gráficos en el futuro -->
-    <div id="assetChartsContainer">
-      <!-- Por ejemplo: gráfico de líneas de evolución temporal, histograma de compras, etc. -->
-    </div>
-  </section>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-  <p id="errorMsg" style="color: red;"></p>
-  <p id="loadingMsg" style="color: gray;"></p>
+</html>
+
+
 
 <script>
-  // === Elementos del DOM ===
-  const form = document.getElementById('apiForm');
-  const table = document.getElementById('portfolioTable');
-  const tbody = table.querySelector('tbody');
-  const errorMsg = document.getElementById('errorMsg');
-  const loadingMsg = document.getElementById('loadingMsg');
-  const donutSection = document.getElementById('donutSection');
-  const summarySection = document.getElementById('summarySection');
-  const chartContainer = document.getElementById('chartContainer');
-  const assetSelect = document.getElementById('assetFilter');
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.getElementById("toggleHelpBtn");
+    const stepsContent = document.getElementById("stepsContent");
 
-  // === Mapas de activos y símbolos fiat ===
-  const assetLabelMap = { 'XXBT': 'BTC', 'XETH': 'ETH', 'ZEUR': 'EUR' };
-  const fiatSymbols = { 'EUR': '€', 'USD': '$', 'GBP': '£', 'JPY': '¥', 'CAD': 'C$', 'CHF': 'Fr.', 'KRW': '₩' };
-
-  // === Funciones utilitarias ===
-  function getFiatSymbol(data) {
-    const fiatAsset = data.find(a => a.average_cost === null);
-    const fiatCode = fiatAsset ? fiatAsset.asset.replace(/^Z/, '') : 'EUR';
-    return fiatSymbols[fiatCode] || '';
-  }
-
-  function updateKpis(symbol, invested, current, profit, profitPct, liquidity) {
-    document.getElementById('kpiInvested').textContent = `${symbol}${invested.toFixed(2)}`;
-    document.getElementById('kpiValue').textContent = `${symbol}${current.toFixed(2)}`;
-    document.getElementById('kpiProfit').textContent = `${symbol}${profit.toFixed(2)}`;
-    document.getElementById('kpiProfitPct').textContent = `${profitPct.toFixed(2)}%`;
-    document.getElementById('kpiLiquidity').textContent = `${symbol}${liquidity.toFixed(2)}`;
-  }
-
-  function renderTable(data) {
-    tbody.innerHTML = '';
-    data.forEach(asset => {
-      if (asset.average_cost === null) return;
-      const row = document.createElement('tr');
-      const readableAsset = assetLabelMap[asset.asset] || asset.asset;
-      row.innerHTML = `
-        <td>${readableAsset}</td>
-        <td>${asset.amount}</td>
-        <td>${asset.average_cost}</td>
-        <td>${asset.current_price}</td>
-        <td>${asset.total_invested}</td>
-        <td>${asset.current_value}</td>
-        <td class="${asset.pnl_eur >= 0 ? 'positive' : 'negative'}">${asset.pnl_eur}</td>
-        <td class="${asset.pnl_percent >= 0 ? 'positive' : 'negative'}">${asset.pnl_percent}%</td>
-      `;
-      tbody.appendChild(row);
-    });
-  }
-
-  function populateAssetFilter(data) {
-    assetSelect.innerHTML = '<option value="ALL">ALL</option>';
-    data.forEach(a => {
-      if (a && typeof a.asset === 'string' && a.average_cost !== null) {
-        const label = assetLabelMap[a.asset] || a.asset;
-        const option = document.createElement('option');
-        option.value = a.asset;
-        option.textContent = label;
-        assetSelect.appendChild(option);
-      }
-    });
-  }
-
-  // === Gráficos ===
-  function renderDonutChart(data, symbol) {
-    const donutCanvas = document.getElementById('donutChart');
-    const labels = [];
-    const values = [];
-
-    data.forEach(asset => {
-      const value = parseFloat(asset.current_value);
-      if (!isNaN(value) && value > 0) {
-        labels.push(assetLabelMap[asset.asset] || asset.asset);
-        values.push(value);
-      }
+    // Toggle clase expandida
+    toggleBtn.addEventListener("click", () => {
+      stepsContent.classList.toggle("expanded");
     });
 
-    if (window.donutChart && typeof window.donutChart.destroy === 'function') {
-      window.donutChart.destroy();
+    // Mostrar spinner al enviar API
+    document.getElementById("apiForm").addEventListener("submit", () => {
+      document.getElementById("loadingIcon").style.display = "block";
+    });
+
+    // Abrir selector CSV
+    document.getElementById("uploadCsvBtn").addEventListener("click", () => {
+      document.getElementById("csvInput").click();
+    });
+
+    // Crear contenedor de toasts si no existe
+    if (!document.getElementById("toastContainer")) {
+      const toastContainer = document.createElement("div");
+      toastContainer.id = "toastContainer";
+      document.body.appendChild(toastContainer);
     }
 
-    donutSection.style.display = labels.length ? 'block' : 'none';
-
-    if (labels.length > 0) {
-      // Plugin para pintar el total en el centro
-      const centerTextPlugin = {
-        id: 'centerText',
-        beforeDraw(chart) {
-          const { ctx, width, height } = chart;
-          ctx.restore();
-          const total = chart.data.datasets[0].data.reduce((sum, v) => sum + v, 0);
-          const fontSize = (height / 150).toFixed(2);
-          ctx.font = `${fontSize}em sans-serif`;
-          ctx.textBaseline = 'middle';
-          const text = `${symbol}${total.toFixed(2)}`;
-          const textX = Math.round((width - ctx.measureText(text).width) / 2);
-          const textY = height / 2;
-          ctx.fillText(text, textX, textY);
-          ctx.save();
-        }
-      };
-
-      window.donutChart = new Chart(donutCanvas, {
-        type: 'doughnut',
-        data: {
-          labels,
-          datasets: [{
-            data: values,
-            backgroundColor: [
-              '#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0',
-              '#3f51b5', '#00bcd4', '#ffc107', '#795548', '#607d8b'
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  const total = context.chart._metasets[0].total;
-                  const value = context.parsed;
-                  const percent = ((value / total) * 100).toFixed(2);
-                  return `${context.label}: ${symbol}${value.toFixed(2)} (${percent}%)`;
-                }
-              }
-            }
-          }
-        },
-        plugins: [ centerTextPlugin ]
-      });
-    }
-  }
-
-
-  function renderSummaryChart(invested, current, profit, profitPct, symbol) {
-    const summaryCanvas = document.getElementById('summaryChart');
-    const summaryLabels = [
-      'Total Invested',
-      'Current Value',
-      `Profit (${profitPct.toFixed(2)}%)`
-    ];
-
-    if (window.summaryChart && typeof window.summaryChart.destroy === 'function') {
-      window.summaryChart.destroy();
-    }
-
-    summarySection.style.display = 'block';
-
-    window.summaryChart = new Chart(summaryCanvas, {
-      type: 'bar',
-      data: {
-        labels: summaryLabels,
-        datasets: [{
-          label: `Portfolio (${symbol})`,
-          data: [
-            invested.toFixed(2),
-            current.toFixed(2),
-            profit.toFixed(2)
-          ],
-          backgroundColor: [
-            '#ff9800',
-            current >= invested ? '#4caf50' : '#f44336',
-            profit >= 0 ? '#4caf50' : '#f44336'
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value) {
-                return symbol + value;
-              }
-            }
-          }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return `${context.dataset.label}: ${symbol}${context.parsed.y}`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  function renderInvestmentPieChart(data, symbol) {
-    const canvas = document.getElementById('investmentPieChart');
-    const labels = [];
-    const values = [];
-
-    data.forEach(asset => {
-      if (asset.average_cost !== null && asset.total_invested > 0) {
-        labels.push(assetLabelMap[asset.asset] || asset.asset);
-        values.push(asset.total_invested);
-      }
+    // Mostrar toast al subir CSV
+    document.getElementById("csvInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) showToast(`${file.name} loaded successfully`);
     });
 
-    if (window.investmentPieChart && typeof window.investmentPieChart.destroy === 'function') {
-      window.investmentPieChart.destroy();
-    }
-
-    const total = values.reduce((sum, v) => sum + v, 0);
-
-    const centerTextPlugin = {
-      id: 'centerInvestmentText',
-      beforeDraw(chart) {
-        const { ctx, width, height } = chart;
-        ctx.restore();
-        const fontSize = (height / 150).toFixed(2);
-        ctx.font = `${fontSize}em sans-serif`;
-        ctx.textBaseline = 'middle';
-        const text = `${symbol}${total.toFixed(2)}`;
-        const textX = Math.round((width - ctx.measureText(text).width) / 2);
-        const textY = height / 2;
-        ctx.fillText(text, textX, textY);
-        ctx.save();
-      }
-    };
-
-    window.investmentPieChart = new Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{
-          data: values,
-          backgroundColor: [
-            '#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0',
-            '#3f51b5', '#00bcd4', '#ffc107', '#795548', '#607d8b'
-          ]
-        }]
-      },
-      options: {
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label(context) {
-                const total = context.chart._metasets[0].total;
-                const value = context.parsed;
-                const percent = ((value / total) * 100).toFixed(2);
-                return `${context.label}: ${symbol}${value.toFixed(2)} (${percent}%)`;
-              }
-            }
-          },
-          legend: {
-            position: 'bottom'
-          }
-        },
-        responsive: true,
-        maintainAspectRatio: false
-      },
-      plugins: [centerTextPlugin]
-    });
-  }
-
-  function renderPortfolioTimelineChart(timelineData) {
-    const ctx = document.getElementById('portfolioTimelineChart');
-
-    const labels = timelineData.map(d => d.date);
-    const values = timelineData.map(d => d.value);
-    const profits = timelineData.map(d => d.profit);
-
-    if (window.timelineChart && typeof window.timelineChart.destroy === 'function') {
-      window.timelineChart.destroy();
-    }
-
-    document.getElementById('timelineSection').style.display = 'block';
-
-    window.timelineChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Portfolio Value (€)',
-            data: values,
-            borderColor: '#2196f3',
-            backgroundColor: 'rgba(33, 150, 243, 0.1)',
-            tension: 0.3,
-            pointRadius: 1,
-            fill: true,
-            yAxisID: 'y',
-          },
-          {
-            label: 'Profit (€)',
-            data: profits,
-            borderColor: '#4caf50',
-            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-            tension: 0.3,
-            pointRadius: 1,
-            fill: true,
-            yAxisID: 'y1',
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        scales: {
-          y: {
-            beginAtZero: false,
-            position: 'left',
-            ticks: {
-              callback: value => `€${value}`
-            },
-            title: {
-              display: true,
-              text: 'Valor total'
-            }
-          },
-          y1: {
-            beginAtZero: false,
-            position: 'right',
-            grid: { drawOnChartArea: false },
-            ticks: {
-              callback: value => `€${value}`
-            },
-            title: {
-              display: true,
-              text: 'Profit acumulado'
-            }
-          }
-        },
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  function agruparPor(timeline, modo) {
-    const agrupado = {};
-    const hoy = new Date();
-
-    // Lunes actual (semana actual)
-    const lunesActual = new Date(hoy);
-    lunesActual.setDate(hoy.getDate() - hoy.getDay() + 1);
-    const claveSemanaActual = lunesActual.toISOString().split("T")[0];
-
-    // Clave mes actual
-    const claveMesActual = `${hoy.getFullYear()}-${(hoy.getMonth() + 1).toString().padStart(2, '0')}`;
-
-    timeline.forEach(entry => {
-      const date = new Date(entry.date);
-      let clave;
-
-      if (modo === "monthly") {
-        const mes = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-        clave = mes === claveMesActual ? "Este mes" : mes;
-      } else if (modo === "weekly") {
-        const monday = new Date(date);
-        monday.setDate(date.getDate() - date.getDay() + 1);
-        const claveLunes = monday.toISOString().split("T")[0];
-        clave = claveLunes === claveSemanaActual ? "Esta semana" : claveLunes;
-      } else {
-        clave = entry.date;
-      }
-
-      if (!agrupado[clave]) agrupado[clave] = [];
-      agrupado[clave].push(entry);
-    });
-
-    // Convertir a array de objetos promedio
-    let resultado = Object.entries(agrupado).map(([key, group]) => {
-      const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
-      return {
-        date: key,
-        value: avg(group.map(e => e.value)),
-        cost: avg(group.map(e => e.cost)),
-        profit: avg(group.map(e => e.profit)),
-        profit_pct: avg(group.map(e => e.profit_pct))
-      };
-    });
-
-    // === Añadir punto final de la fecha más reciente si falta ===
-    const ultimaFecha = timeline[timeline.length - 1];
-    const ultimaClave = modo === "weekly" ? "Esta semana"
-                    : modo === "monthly" ? "Este mes"
-                    : ultimaFecha.date;
-
-    const yaIncluido = resultado.some(r => r.date === ultimaClave);
-    if (!yaIncluido && (modo === "weekly" || modo === "monthly")) {
-      resultado.push({
-        date: ultimaClave,
-        value: ultimaFecha.value,
-        cost: ultimaFecha.cost,
-        profit: ultimaFecha.profit,
-        profit_pct: ultimaFecha.profit_pct
-      });
-    }
-
-    return resultado;
-  }
-
-
-
-  function renderCharts(data, timeline) {
-    const symbol = getFiatSymbol(data);
-    const filteredAssets = data.filter(a => a.average_cost !== null);
-    const totalInvested = filteredAssets.reduce((sum, a) => sum + a.total_invested, 0);
-    const totalCurrent = filteredAssets.reduce((sum, a) => sum + a.current_value, 0);
-    const profit = totalCurrent - totalInvested;
-    const profitPercent = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
-    const fiatAsset = data.find(a => a.average_cost === null);
-    const liquidity = fiatAsset ? fiatAsset.current_value : 0;
-
-    updateKpis(symbol, totalInvested, totalCurrent, profit, profitPercent, liquidity);
-    renderDonutChart(data, symbol);
-    renderSummaryChart(totalInvested, totalCurrent, profit, profitPercent, symbol);
-    renderInvestmentPieChart(data, symbol);
-    renderPortfolioTimelineChart(timeline);
-
-  }
-
-  // === Petición al backend + renderizado ===
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errorMsg.textContent = '';
-    loadingMsg.textContent = 'Fetching portfolio, please wait...';
-    table.style.display = 'none';
-    chartContainer.style.display = 'none';
-
-    const api_key = document.getElementById('apiKey').value;
-    const api_secret = document.getElementById('apiSecret').value;
-
-    try {
-      const response = await fetch('/api/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ api_key, api_secret })
-      });
-
-      const data = await response.json();
-
-      if (!data.summary || !Array.isArray(data.summary)) {
-        errorMsg.textContent = data.error || 'Unexpected response format';
-        console.error('Backend error:', data);
-        return;
-      }
-
-      const summary = data.summary;
-      const timeline = data.timeline;
-      window.portfolioData = summary;
-      fullTimeline = timeline;
-
-      loadingMsg.textContent = '';
-
-      if (data.error) {
-        errorMsg.textContent = data.error;
-        return;
-      }
-
-      renderTable(summary);
-      renderCharts(summary, timeline);
-      populateAssetFilter(summary);
-
-      form.style.display = 'none';
-      table.style.display = '';
-      chartContainer.style.display = 'flex';
-      document.getElementById('globalSummarySection').style.display = 'block';
-      document.getElementById('tableSection').style.display = 'block';
-      document.getElementById('assetAnalysisSection').style.display = 'block';
-
-    } catch (err) {
-      loadingMsg.textContent = '';
-      errorMsg.textContent = 'Something went wrong. Check the console.';
-      console.error(err);
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      document.getElementById("toastContainer").appendChild(toast);
+      setTimeout(() => toast.remove(), 3200);
     }
   });
-  let fullTimeline = []; // guardamos el timeline completo
-
-  document.getElementById('granularityFilter').addEventListener('change', () => {
-    const modo = document.getElementById('granularityFilter').value;
-    const timelineFiltrado = agruparPor(fullTimeline, modo);
-    renderPortfolioTimelineChart(timelineFiltrado);
-  });
-
-  // === Filtro por activo individual ===
-  // assetSelect.addEventListener('change', () => {
-  //   const selected = assetSelect.value;
-  //   const filtered = selected === 'ALL'
-  //     ? window.portfolioData
-  //     : window.portfolioData.filter(a => a.asset === selected);
-  //   renderCharts(filtered);
-  // });
 </script>

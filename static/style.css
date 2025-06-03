@@ -1,0 +1,526 @@
+/* === 1. BASE & RESET === */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+  --bg-dark: #000;
+  --text-light: #f0f0f0;
+  --accent: #bb77dd;
+  --accent-light: #d0aaff;
+  --form-bg: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+  --btn-primary: #aa00fe;
+  --btn-primary-hover: #7500a3;
+  --toast-bg:  #bb77dd;
+  --toast-progress: #aa00fe;
+  --divider-line: rgba(255, 255, 255, 0.15);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* === 2. TYPOGRAPHY === */
+.main-title {
+  font-size: 3.2rem;
+  font-weight: 700;
+  margin: -10px 0 0.5rem;
+  margin-bottom: -20px;
+  margin-top: -40px;
+  color: #fff;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+  letter-spacing: -1px;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #ac00fc;
+  font-weight: 500;
+  margin-top: 5px;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgb(241, 0, 225);
+  text-align: center;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 60px 20px;
+  box-sizing: border-box;
+}
+.core-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  transform: scale(0.90); /* Reduce todo un 15% */
+  transform-origin: top center; /* Opcional: punto de referencia para el escalado */
+  margin-bottom: -50px;
+}
+
+
+/* === 4. COMPONENTS === */
+.main-logo {
+  width: 220px;
+  margin-top: -20px;
+}
+
+form#apiForm {
+  background: var(--form-bg);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 60px 30px; /* antes era 30px, ahora más alto */
+  backdrop-filter: blur(12px);
+}
+
+.input-icon {
+  width: 100%;
+  margin-bottom: 10px;
+  padding-top: 4px;
+}
+
+.input-icon label {
+  display: block;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+label[for="apiKey"]::before {
+  content: "\1F511  "; /* 🔑 */
+}
+
+label[for="apiSecret"]::before {
+  content: "\1F512  "; /* 🔒 */
+}
+
+.input-icon input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: #f5f7fc;
+  color: #1a1a1a;
+  font-size: 1.05rem;
+  font-weight: 500;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--divider-line);
+}
+
+.divider-text {
+  font-size: 0.9rem;
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+button {
+  padding: 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+form#apiForm button[type="submit"] {
+  width: 100%;
+  background: var(--btn-primary);
+  color: white;
+  margin-top: 10px;
+}
+
+form#apiForm button[type="submit"]:hover {
+  background: var(--btn-primary-hover);
+  transform: scale(1.03);
+}
+
+#uploadCsvBtn {
+  background: #1e1e1e;
+  color: #f0f0f0;
+  padding: 12px 24px;
+  border: 1px solid #444;
+  min-width: 220px;
+}
+
+#uploadCsvBtn:hover {
+  background: #2a2a2a;
+  border-color: #666;
+  transform: scale(1.02);
+}
+
+.kraken-disclaimer {
+  margin-top: 5px;
+  font-size: 1rem;
+  color: #ff8888;
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 0 0 5px rgba(255, 100, 100, 0.4);
+}
+
+.btc-loader {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.btc-loader img {
+  width: 40px;
+  height: 40px;
+  animation: spin 1.2s linear infinite;
+  filter: drop-shadow(0 0 4px var(--accent));
+}
+
+.btc-text {
+  margin-top: 8px;
+  font-style: italic;
+  color: var(--accent);
+  font-size: 0.95rem;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(187, 119, 221, 0.4);
+}
+
+.footer {
+  height: 80px; /* Altura fija */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #aaa;
+  opacity: 0.85;
+  border-top: 1px solid #2a2a2a;
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+  margin-top: auto; /* ⬅️ ESTE es el truco */
+}
+
+.footer a {
+  color: #9b59b6;
+  text-decoration: none;
+  margin: 0 8px;
+  transition: color 0.3s ease;
+}
+
+.footer a:hover {
+  color: var(--accent);
+}
+
+.footer-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 4px rgba(187, 119, 221, 0.6);
+  margin-top: 5px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* === 5. ANIMATIONS === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInOutToast {
+  0% { opacity: 0; transform: translateY(20px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+
+@keyframes toastProgress {
+  0% { width: 100%; }
+  100% { width: 0%; }
+}
+
+/* === 6. TOAST === */
+#toastContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.toast {
+  background: var(--toast-bg);
+  color: #0a0a0a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  animation: fadeInOutToast 3.2s ease forwards;
+  position: relative;
+}
+
+.toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: var(--toast-progress);
+  width: 100%;
+  animation: toastProgress 3.2s linear forwards;
+}
+
+/* === 7. RESPONSIVE === */
+@media (max-width: 768px) {
+  .core-block {
+    padding: 30px 20px;
+  }
+}
+
+/* === Botón y bloque de ayuda juntos === */
+.help-toggle {
+  position: absolute;
+  top: -560px; /* Ajusta esta altura según tu diseño */
+  left: calc(50% + 280px); /* Esto lo pone a la derecha del form */
+  width: 680px;
+  z-index: 20;
+}
+
+#toggleHelpBtn {
+  background: none;
+  color: #ffffff;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+}
+
+#toggleHelpBtn::before {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #ffffff;
+  color: #000;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+#toggleHelpBtn:hover::before {
+  background-color: #bf43f4; /* nuevo color al hacer hover */
+  color: #000000; /* si también quieres cambiar el color del + */
+}
+
+#toggleHelpBtn:hover {
+  color: #bd7de0;
+}
+
+#stepsContent {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.4s ease;
+}
+
+#stepsContent.expanded {
+  max-height: 2000px; /* suficiente para contener todo */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+
+.step-block {
+  margin-bottom: 32px;
+}
+
+.step-block h4 {
+  margin: 20px 0 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f4f4f4; /* más blanco que #eaeaea */
+  border-left: 4px solid #444;
+  padding-left: 12px;
+}
+
+.step-list {
+  padding-left: 70px;
+  margin-top: 12px;
+  border-left-width: 2px;
+  position: relative;
+}
+
+.step-list::before {
+  content: "";
+  position: absolute;
+  left: 47px;
+  top: 20px;
+  bottom: 10px;
+  width: 2px;
+  background-color: #3a3a3a;
+  z-index: 0;
+}
+
+.step-list li {
+  margin-top: 8px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.3s ease;
+  color: #cccccc;
+  font-size: 0.96rem;
+}
+
+#stepsContent.expanded .step-list li {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+#stepsContent.expanded .step-list li:nth-child(1) { animation-delay: 0.05s; }
+#stepsContent.expanded .step-list li:nth-child(2) { animation-delay: 0.10s; }
+#stepsContent.expanded .step-list li:nth-child(3) { animation-delay: 0.15s; }
+#stepsContent.expanded .step-list li:nth-child(4) { animation-delay: 0.20s; }
+
+.step-content {
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.6;
+  color: #ddd;
+  
+}
+
+/* Hacer que los <strong> destaquen */
+.step-content strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Enlaces lilas */
+.step-list a {
+  color: #b38aff;
+  text-decoration: none;
+  font-weight: 500;
+}
+.step-list a:hover {
+  color: #d4afff;
+  text-decoration: underline;
+}
+
+/* Círculo del número */
+.dot {
+  position: absolute;
+  left: -32px;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  background-color: #fff;
+  color: #000;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 3px rgba(0,0,0,0.3);
+}
+
+/* Sublista elegante */
+.substep-list {
+  list-style: disc;
+  padding-left: 18px;
+  margin-top: 8px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+
